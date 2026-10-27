@@ -5,16 +5,20 @@ https://claude.ai/artifact/8ER5bzwtfwzpLSv4JSEmMp · makiety wyglądu:
 https://claude.ai/artifact/AVxDjANrVdNcw4Qed5vDbj
 
 ## Zasada pracy
-Ten folder (`[App] Todo\kod-zrodlowy`) jest źródłem prawdy. Nie pisać od nowa —
-wczytać pliki stąd, poprawić tylko to, o co prosi Piotr, przebudować i nadpisać
-`..\Plan.html`. Po każdej zmianie zaktualizować sekcję „Stan” poniżej.
+Źródłem prawdy jest repozytorium GitHub **aipiotrlipinski/Todo** (gałąź `main`).
+Nie pisać od nowa — sklonować repo, poprawić tylko to, o co prosi Piotr, sprawdzić
+testy i build, zrobić commit i push na `main`. GitHub Actions samo publikuje aplikację na
+**https://aipiotrlipinski.github.io/Todo/**. Po każdej zmianie zaktualizować sekcję „Stan”.
+Kopia na komputerze Piotra: `[App] Todo\kod-zrodlowy` + `[App] Todo\Plan.html` (wersja offline).
+Uwaga: wersja z GitHub Pages i Plan.html mają osobne dane (inny adres w przeglądarce);
+przenoszenie przez Ustawienia → kopia JSON.
 
 ## Jak wznowić w nowej sesji
-1. Skopiować cały `kod-zrodlowy` do workspace (bez node_modules — nie ma go tu).
+1. Sklonować repo aipiotrlipinski/Todo (albo skopiować `kod-zrodlowy` z komputera).
 2. `npm install`
 3. `npm test` (parser + powtarzanie) i `npx tsc --noEmit -p .`
 4. `npx vite build` → `dist/index.html` (jeden plik, wszystko wbudowane)
-5. Skopiować `dist/index.html` jako `[App] Todo\Plan.html` oraz zmienione źródła z powrotem.
+5. Commit + push na `main` (publikacja automatyczna). Opcjonalnie skopiować `dist/index.html` jako `[App] Todo\Plan.html`.
 
 ## Decyzje (ustalone z Piotrem)
 - Jedna osoba, PC, aplikacja w przeglądarce, dane lokalnie (IndexedDB przez Dexie).
