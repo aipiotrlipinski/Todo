@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   apk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +26,7 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+      - uses: android-actions/setup-android@v3
       - run: npm ci
       - run: npm test
       - run: npx tsc --noEmit -p .
@@ -37,7 +38,12 @@ jobs:
           APP_VERSION_CODE: ${{ github.run_number }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          set -o pipefail
+          if ! ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee ../gradle.log; then
+            # Show the error in the run summary (annotations are readable without logging in).
+            grep -E "error|Error|FAIL|What went wrong|Could not|>" ../gradle.log | grep -v "^\s*at " | tail -25 | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
           cp app/build/outputs/apk/release/app-release.apk ../Plan.apk
       - uses: actions/upload-artifact@v4
         with:
