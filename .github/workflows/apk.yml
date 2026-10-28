@@ -42,7 +42,8 @@ jobs:
           set -o pipefail
           if ! ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee ../gradle.log; then
             # Show the error in the run summary (annotations are readable without logging in).
-            grep -E "error|Error|FAIL|What went wrong|Could not|>" ../gradle.log | grep -v "^\s*at " | tail -25 | while IFS= read -r l; do echo "::error::$l"; done
+            { grep -A12 "What went wrong" ../gradle.log; grep -E "error:|warning: \[|\.java:[0-9]+" ../gradle.log | head -20; } > ../err.txt
+            echo "::error::$(sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g' ../err.txt)"
             exit 1
           fi
           cp app/build/outputs/apk/release/app-release.apk ../Plan.apk
