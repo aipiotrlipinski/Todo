@@ -20,6 +20,16 @@ przenoszenie przez Ustawienia → kopia JSON.
 4. `npx vite build` → `dist/index.html` (jeden plik, wszystko wbudowane)
 5. Commit + push na `main` (publikacja automatyczna). Opcjonalnie skopiować `dist/index.html` jako `[App] Todo\Plan.html`.
 
+## Aplikacja na Androida (APK)
+- Capacitor 7 (`capacitor.config.ts`, folder `android/`), appId `pl.lipinski.plan`, nazwa „Plan”.
+- Workflow `.github/workflows/apk.yml` przy każdym pushu buduje APK i publikuje je jako wydanie.
+  Stały link: https://github.com/aipiotrlipinski/Todo/releases/latest/download/Plan.apk
+- Podpis: `android/app/plan.keystore` (hasło w `android/app/build.gradle`). Nie zmieniać —
+  inny klucz = telefon nie zainstaluje aktualizacji bez odinstalowania (utrata danych).
+- versionCode = numer uruchomienia workflow, więc nowa wersja zawsze instaluje się na starą.
+- Ikony/splash wygenerowane z favicony (fiolet #6D4AFF + ptaszek) w `android/app/src/main/res`.
+- Telefon ma własne dane (osobna baza); przenoszenie przez Ustawienia → kopia JSON.
+
 ## Decyzje (ustalone z Piotrem)
 - Jedna osoba, PC, aplikacja w przeglądarce, dane lokalnie (IndexedDB przez Dexie).
 - Otwierana dwuklikiem z pliku (vite-plugin-singlefile), bez serwera.
@@ -45,8 +55,8 @@ przenoszenie przez Ustawienia → kopia JSON.
 - `src/components/` – Sidebar (projekty i podprojekty z przeciąganiem), QuickAdd (podświetlanie przez warstwę „mirror”), TaskItem/TaskList/TaskTree, TaskEditor (okno), DayPlan (oś dnia), icons
 - `src/views/` – Today, Inbox, Upcoming, ProjectView (etapy z przeciąganiem zadań, sekcja podprojektów), LabelView, Settings, Header
 
-## Stan (2026-10-25, wersja 2)
-Zrobione: etap 1, etap 2, część etapu 3 (projekty z etapami, przeciąganie zadań w etapie i między etapami, następne działanie, postęp), podprojekty (jeden poziom).
+## Stan (2026-10-28, wersja 2 + APK)
+Zrobione: APK na Androida (Capacitor), etap 1, etap 2, część etapu 3 (projekty z etapami, przeciąganie zadań w etapie i między etapami, następne działanie, postęp), podprojekty (jeden poziom).
 Brakuje wg planu: widok tablicy etapów (3), filtry (4),
 przeciąganie bloków / wydarzenia stałe / widok tygodnia (5), planista dnia (6), PWA (7).
 
@@ -59,3 +69,4 @@ przy otwartym oknie zadania kliknięcie podzadania otwiera je bez zapisu zmian r
 - [x] Przesuwanie zadań w projekcie (w etapie i między etapami)
 - [x] Powtarzanie w wybrane dni tygodnia (okno zadania: „W wybrane dni tygodnia”; parser: „co wt, czw i pt”)
 - [x] Podprojekty: widok pod głównym projektem, zagnieżdżenie w menu, „Należy do projektu” w edycji projektu
+- [x] Wersja na telefon jako APK (Android)
