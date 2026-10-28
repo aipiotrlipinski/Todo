@@ -26,12 +26,13 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
-      - uses: android-actions/setup-android@v3
       - run: npm ci
       - run: npm test
       - run: npx tsc --noEmit -p .
       - run: npx vite build
-      - run: npx cap sync android
+      - run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          npx cap sync android
       - name: Budowanie APK
         working-directory: android
         env:
