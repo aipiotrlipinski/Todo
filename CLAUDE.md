@@ -52,11 +52,12 @@ przenoszenie przez Ustawienia → kopia JSON.
 - `src/theme.ts` – motyw
 - `src/App.tsx` – układ, widoki, skróty (Q, G+T/I/U/S), toast z „Cofnij”
 - `src/components/sortable.tsx` – przeciąganie (dnd-kit): uchwyt, czujniki, komunikaty po polsku
+- `src/components/BottomNav.tsx` – dolny pasek na telefonie (≤860px): Skrzynka, Dziś, Nadchodzące, Projekty; „Projekty” = widok `browse` (menu na pełny ekran: projekty, etykiety, ustawienia, motyw). Na PC pasek ukryty, menu boczne bez zmian.
 - `src/components/` – Sidebar (projekty i podprojekty z przeciąganiem), QuickAdd (podświetlanie przez warstwę „mirror”), TaskItem/TaskList/TaskTree, TaskEditor (okno), DayPlan (oś dnia), icons
 - `src/views/` – Today, Inbox, Upcoming, ProjectView (etapy z przeciąganiem zadań, sekcja podprojektów), LabelView, Settings, Header
 
-## Stan (2026-10-28, wersja 2 + APK)
-Zrobione: APK na Androida (Capacitor), etap 1, etap 2, część etapu 3 (projekty z etapami, przeciąganie zadań w etapie i między etapami, następne działanie, postęp), podprojekty (jeden poziom).
+## Stan (2026-11-02, wersja 2 + APK)
+Zrobione: dolny pasek nawigacji na telefonie (jak w Todoist), APK na Androida (Capacitor), etap 1, etap 2, część etapu 3 (projekty z etapami, przeciąganie zadań w etapie i między etapami, następne działanie, postęp), podprojekty (jeden poziom).
 Brakuje wg planu: widok tablicy etapów (3), filtry (4),
 przeciąganie bloków / wydarzenia stałe / widok tygodnia (5), planista dnia (6), PWA (7).
 
@@ -70,3 +71,4 @@ przy otwartym oknie zadania kliknięcie podzadania otwiera je bez zapisu zmian r
 - [x] Powtarzanie w wybrane dni tygodnia (okno zadania: „W wybrane dni tygodnia”; parser: „co wt, czw i pt”)
 - [x] Podprojekty: widok pod głównym projektem, zagnieżdżenie w menu, „Należy do projektu” w edycji projektu
 - [x] Wersja na telefon jako APK (Android)
+- [x] Dolny pasek na telefonie jak w Todoist: Skrzynka, Dziś, Nadchodzące, Projekty

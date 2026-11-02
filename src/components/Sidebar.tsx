@@ -110,7 +110,7 @@ export function Sidebar({ theme }: Props) {
         <span className="brand-name">Plan</span>
       </div>
 
-      <div className="nav-group">
+      <div className="nav-group nav-main">
         {nav({ kind: 'inbox' }, 'Skrzynka', <IconInbox />, counts.inbox)}
         {nav({ kind: 'today' }, 'Dziś', <IconToday />, counts.today)}
         {nav({ kind: 'upcoming' }, 'Nadchodzące', <IconUpcoming />)}

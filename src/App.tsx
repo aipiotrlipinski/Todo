@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { BottomNav } from './components/BottomNav';
 import { Sidebar } from './components/Sidebar';
 import { TaskEditor } from './components/TaskEditor';
 import { toISO, useData, useNow, UIProvider } from './store';
@@ -88,16 +89,18 @@ export function App() {
 
   return (
     <UIProvider value={{ view, setView, openTask: setEditing, toast, now, today: toISO(now) }}>
-      <div className="app">
+      <div className={`app${view.kind === 'browse' ? ' view-browse' : ''}`}>
         <Sidebar theme={theme} />
         <main className="main" key={view.kind + ('id' in view ? view.id : '')}>
-          {view.kind === 'today' && <Today />}
+          {/* 'browse' is the phone menu screen; on a wide screen the sidebar is always visible, so show Today. */}
+          {(view.kind === 'today' || view.kind === 'browse') && <Today />}
           {view.kind === 'inbox' && <Inbox />}
           {view.kind === 'upcoming' && <Upcoming />}
           {view.kind === 'project' && <ProjectView id={view.id} />}
           {view.kind === 'label' && <LabelView id={view.id} />}
           {view.kind === 'settings' && <Settings theme={theme} />}
         </main>
+        <BottomNav />
       </div>
       {editingTask && <TaskEditor key={editingTask.id} task={editingTask} />}
       {toastItem && (

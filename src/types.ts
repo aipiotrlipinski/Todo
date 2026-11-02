@@ -95,4 +95,6 @@ export type View =
   | { kind: 'upcoming' }
   | { kind: 'project'; id: string }
   | { kind: 'label'; id: string }
-  | { kind: 'settings' };
+  | { kind: 'settings' }
+  /** Phone only: the menu (projects, labels, settings) as a full screen. */
+  | { kind: 'browse' };
