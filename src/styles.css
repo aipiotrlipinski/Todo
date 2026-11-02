@@ -33,6 +33,7 @@
   --overlay: rgba(20, 22, 35, 0.35);
   --toast-bg: #1b1b23;
   --toast-text: #ffffff;
+  --page: #ffffff;
 }
 
 [data-theme='dark'] {
@@ -68,6 +69,14 @@
   --overlay: rgba(0, 0, 0, 0.55);
   --toast-bg: #eceef1;
   --toast-text: #0f1115;
+  --page: #101216;
+}
+
+/* Space taken by the phone's status bar and navigation bar.
+   env() works in browsers; in the Android app the values come from native code (src/native.ts). */
+:root {
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--native-top, 0px));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-bottom, 0px));
 }
 
 /* ---------- Base ---------- */
@@ -313,7 +322,7 @@ code {
 .task.nested { margin: -2px 0 0 34px; padding: 7px 12px; border-style: dashed; }
 .task.done .task-title { text-decoration: line-through; color: var(--muted); }
 .check {
-  width: 22px; height: 22px; flex: none; border-radius: 8px; padding: 0;
+  width: 22px; height: 22px; flex: none; border-radius: 50%; padding: 0;
   border: 1.5px solid var(--check); background: none; color: transparent;
   display: flex; align-items: center; justify-content: center; transition: background 0.15s;
 }
@@ -434,7 +443,7 @@ kbd {
 /* Bottom tab bar: phones only */
 .bottom-nav { display: none; }
 @media (max-width: 860px) {
-  .app { flex-direction: column; padding: 10px; gap: 10px; padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .app { flex-direction: column; padding: 10px; gap: 10px; }
   .sidebar { width: 100%; position: static; min-height: 0; display: none; }
   .view-browse .sidebar { display: flex; }
   .view-browse .main { display: none; }
@@ -442,7 +451,7 @@ kbd {
   .sidebar .nav-main { display: none; }
   .bottom-nav {
     display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    padding: 6px 6px calc(6px + var(--safe-bottom));
     background: var(--panel); border-top: 1px solid var(--panel-border);
     box-shadow: 0 -4px 16px rgba(20, 20, 40, 0.06);
   }
@@ -464,7 +473,6 @@ kbd {
     border-radius: 9px; background: var(--accent); color: var(--on-accent);
     font-size: 10.5px; line-height: 17px; text-align: center;
   }
-  .toast { bottom: calc(90px + env(safe-area-inset-bottom)); }
   .plan { position: static; }
   .header { padding: 18px; }
   .tasks-panel, .plan { padding: 16px; }
@@ -524,3 +532,100 @@ kbd {
 }
 .weekday-picker button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .main > .tasks-panel { flex: none; }
+
+/* ---------- Todoist import ---------- */
+.steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; color: var(--text-soft); }
+.import-row { display: flex; gap: 8px; max-width: 520px; }
+.import-ok { color: var(--green-text); font-weight: 600; }
+
+/* ---------- Phone add button + sheet (hidden on wide screens) ---------- */
+.fab, .sheet-overlay { display: none; }
+
+/* ---------- Phone: flat, clean layout like Todoist ---------- */
+@media (max-width: 860px) {
+  body, .app { background: var(--page); }
+  .app { padding: 0 0 calc(68px + var(--safe-bottom)); gap: 0; align-items: stretch; }
+  .settings .field-label { flex: 1 0 100%; }
+  .settings .field-row > .field { flex: 1 1 120px; }
+  .import-row { max-width: none; }
+  .main { gap: 0; }
+  .main .panel {
+    background: transparent; border: none; border-radius: 0; box-shadow: none;
+  }
+  .columns { flex-direction: column; align-items: stretch; gap: 0; }
+  .columns > .panel { flex: none; }
+
+  /* Header starts below the status bar */
+  .header { padding: calc(var(--safe-top) + 20px) 20px 4px; gap: 8px; }
+  .header h1 { font-size: 26px; line-height: 1.2; }
+  .header .eyebrow { font-size: 13px; }
+  .header-sub, .header > .quick-add { display: none; }
+
+  .tasks-panel, .main > .tasks-panel, .plan { padding: 6px 20px 12px; gap: 0; }
+  .panel-title {
+    font-size: 14px; font-weight: 700; margin: 10px 0 0; padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .plan { border-top: 8px solid var(--sub); margin-top: 12px; padding-top: 14px; gap: 8px; }
+  .plan .panel-title { border-bottom: none; margin-top: 0; }
+
+  /* Task rows: no boxes, just a thin line between them */
+  .task-list { gap: 0; }
+  .task, [data-theme='dark'] .task {
+    border: none; border-bottom: 1px solid var(--line); border-radius: 0;
+    background: transparent; padding: 13px 0; gap: 12px; align-items: flex-start;
+  }
+  .task:hover { border-color: var(--line); }
+  .task .check { margin-top: 1px; }
+  .task-body { padding: 0; gap: 3px; }
+  .task-title { font-size: 15px; font-weight: 450; }
+  .task-meta { font-size: 12.5px; }
+  .task.nested { margin: 0 0 0 34px; padding: 11px 0; border-style: solid; }
+  .est { margin-top: 1px; }
+  .empty { padding: 36px 8px; text-align: center; }
+
+  .overdue { margin: 10px 0 6px; padding: 8px 12px; border-radius: 14px; gap: 0; }
+  .overdue .task { border-color: color-mix(in srgb, var(--warn-text) 15%, transparent); }
+  .overdue .task:last-child { border-bottom: none; }
+  .day-group { gap: 0; padding: 8px 0 6px; }
+  .day-head { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .day-head.empty-day { border-bottom: none; padding-bottom: 0; }
+  .stage { gap: 0; }
+  .stage-head { padding-bottom: 8px; }
+  .sortable { gap: 0; }
+
+  /* Menu screen (Projekty) */
+  .view-browse .sidebar {
+    background: transparent; border: none; border-radius: 0; box-shadow: none;
+    padding: calc(var(--safe-top) + 20px) 16px 16px;
+  }
+
+  /* Dialogs below the status bar */
+  .overlay { padding-top: calc(var(--safe-top) + 12px); }
+
+  .bottom-nav { background: var(--page); box-shadow: none; border-top: 1px solid var(--line); }
+
+  .fab {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; right: 18px; bottom: calc(80px + var(--safe-bottom)); z-index: 41;
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    background: var(--accent); color: var(--on-accent);
+    box-shadow: 0 6px 18px rgba(20, 20, 40, 0.28);
+  }
+  .fab svg { width: 26px; height: 26px; stroke-width: 2; }
+  .view-browse .fab { display: none; }
+
+  .sheet-overlay {
+    display: flex; align-items: flex-end; position: fixed; inset: 0; z-index: 70;
+    background: var(--overlay);
+  }
+  .sheet {
+    width: 100%; background: var(--panel); border-radius: 20px 20px 0 0;
+    padding: 18px 16px calc(16px + var(--safe-bottom));
+    animation: sheet-in 0.18s ease-out;
+  }
+  .sheet .qa-input, .sheet .qa-mirror { font-size: 16px; }
+
+  .toast { bottom: calc(148px + var(--safe-bottom)); }
+}
+@keyframes sheet-in { from { transform: translateY(24px); opacity: 0.6; } }

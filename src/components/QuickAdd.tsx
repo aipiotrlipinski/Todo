@@ -12,6 +12,7 @@ interface Props {
   id?: string;
   compact?: boolean;
   label?: string;
+  autoFocus?: boolean;
 }
 
 const KIND_CLASS: Record<Token['kind'], string> = {
@@ -25,7 +26,7 @@ const KIND_CLASS: Record<Token['kind'], string> = {
   estimate: 'tk-neutral',
 };
 
-export function QuickAdd({ defaults = {}, placeholder, id, compact, label = 'Szybkie dodawanie' }: Props) {
+export function QuickAdd({ defaults = {}, placeholder, id, compact, label = 'Szybkie dodawanie', autoFocus }: Props) {
   const { projects, stages, labels, projectById, stageById } = useData();
   const { today, toast } = useUI();
   const [text, setText] = useState('');
@@ -107,6 +108,7 @@ export function QuickAdd({ defaults = {}, placeholder, id, compact, label = 'Szy
               inputRef.current?.blur();
             }
           }}
+          autoFocus={autoFocus}
           autoComplete="off"
           spellCheck={false}
         />

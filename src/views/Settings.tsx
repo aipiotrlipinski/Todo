@@ -4,6 +4,7 @@ import { daysBetween, formatLong } from '../dates';
 import { useData, useUI, type PlanWindow } from '../store';
 import type { ThemePref } from '../theme';
 import { Header } from './Header';
+import { TodoistImport } from './TodoistImport';
 
 export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: ThemePref) => void } }) {
   const { settings, tasks } = useData();
@@ -85,6 +86,8 @@ export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: Them
             ))}
           </div>
         </div>
+
+        <TodoistImport />
 
         <div className="settings-group">
           <h2 className="panel-title">Kopia zapasowa</h2>

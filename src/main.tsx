@@ -3,7 +3,10 @@ import './styles.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { initNative } from './native';
 import { DataProvider } from './store';
+
+initNative();
 
 // Ask the browser not to evict our local data when disk space runs low.
 navigator.storage?.persist?.().catch(() => {});
