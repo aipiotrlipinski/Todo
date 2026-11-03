@@ -4,7 +4,7 @@ import type { View } from '../types';
 import { routinesLeftToday } from '../routines';
 import { IconGoal, IconInbox, IconProjects, IconRoutine, IconToday, IconUpcoming } from './icons';
 
-// Phone-only tab bar (like Todoist): Skrzynka, Dziś, Nadchodzące, Rutyny, Cele, Projekty.
+// Phone-only tab bar (like Todoist): Rutyny, Dziś, Nadchodzące, Skrzynka, Cele, Projekty.
 export function BottomNav() {
   const { tasks, routines, routineDone } = useData();
   const { view, setView, today } = useUI();
@@ -24,10 +24,10 @@ export function BottomNav() {
 
   return (
     <nav className="bottom-nav" aria-label="Nawigacja dolna">
-      {tab({ kind: 'inbox' }, 'Skrzynka', <IconInbox />, view.kind === 'inbox', counts.inbox)}
+      {tab({ kind: 'routines' }, 'Rutyny', <IconRoutine />, view.kind === 'routines', counts.routines)}
       {tab({ kind: 'today' }, 'Dziś', <IconToday />, view.kind === 'today', counts.today)}
       {tab({ kind: 'upcoming' }, 'Nadchodzące', <IconUpcoming />, view.kind === 'upcoming')}
-      {tab({ kind: 'routines' }, 'Rutyny', <IconRoutine />, view.kind === 'routines', counts.routines)}
+      {tab({ kind: 'inbox' }, 'Skrzynka', <IconInbox />, view.kind === 'inbox', counts.inbox)}
       {tab({ kind: 'goals' }, 'Cele', <IconGoal />, view.kind === 'goals' || view.kind === 'goal')}
       {tab({ kind: 'browse' }, 'Projekty', <IconProjects />, inMenu)}
     </nav>
