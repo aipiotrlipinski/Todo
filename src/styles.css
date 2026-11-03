@@ -781,3 +781,21 @@ kbd {
   border-bottom: 1px solid transparent;
 }
 .proposal-title:focus { outline: none; border-bottom-color: var(--accent); }
+
+/* ---------- Now ---------- */
+.now-controls { display: flex; flex-direction: column; gap: 8px; }
+.now-controls .chip { padding: 6px 12px; font-size: 13px; cursor: pointer; }
+.now-ctx { align-self: center; margin-right: 2px; }
+.now-top {
+  text-align: left; border: none; border-radius: 16px; padding: 16px 18px; margin-bottom: 6px;
+  background: var(--accent-soft); color: var(--accent-soft-text); display: flex; flex-direction: column; gap: 3px;
+}
+.now-top .muted { color: inherit; opacity: 0.8; }
+.now-top-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.now-unknown { align-self: flex-start; margin-top: 6px; }
+.header-actions .secondary-btn svg { width: 15px; height: 15px; }
+@media (max-width: 860px) {
+  .now-controls .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .now-controls .chip { flex: none; }
+  .now-top { margin-top: 10px; }
+}

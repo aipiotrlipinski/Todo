@@ -1,5 +1,6 @@
 import { moveTasksToDate } from '../actions';
 import { DayPlan } from '../components/DayPlan';
+import { IconNow } from '../components/icons';
 import { TaskList } from '../components/TaskItem';
 import { formatLong } from '../dates';
 import { todayTasks } from '../selectors';
@@ -9,7 +10,7 @@ import { ReviewPrompt } from './Review';
 
 export function Today() {
   const { tasks } = useData();
-  const { today, toast } = useUI();
+  const { today, toast, setView } = useUI();
   const { overdue, today: list } = todayTasks(tasks, today);
   const doneToday = tasks.filter((t) => t.status === 'done' && t.completedAt && new Date(t.completedAt).toDateString() === new Date().toDateString());
 
@@ -20,7 +21,8 @@ export function Today() {
 
   return (
     <>
-      <Header eyebrow={formatLong(today)} title="Dziś" defaults={{ due: today }}>
+      <Header eyebrow={formatLong(today)} title="Dziś" defaults={{ due: today }}
+        actions={<button type="button" className="secondary-btn" onClick={() => setView({ kind: 'now' })} title="Zadania, które zmieszczą się w czasie do następnego punktu dnia (G, N)"><IconNow /> Teraz</button>}>
         <ReviewPrompt />
       </Header>
       <div className="columns">

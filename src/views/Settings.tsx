@@ -147,6 +147,7 @@ export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: Them
           <ul className="shortcuts">
             <li><kbd>Q</kbd> szybkie dodawanie · <kbd>A</kbd> asystent AI</li>
             <li><kbd>G</kbd> <kbd>T</kbd> Dziś · <kbd>G</kbd> <kbd>I</kbd> Skrzynka · <kbd>G</kbd> <kbd>U</kbd> Nadchodzące</li>
+            <li><kbd>G</kbd> <kbd>N</kbd> Teraz · <kbd>G</kbd> <kbd>C</kbd> Cele · <kbd>G</kbd> <kbd>R</kbd> przegląd dnia</li>
             <li><kbd>Esc</kbd> zamknij okno · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> zapisz zadanie</li>
           </ul>
         </div>
