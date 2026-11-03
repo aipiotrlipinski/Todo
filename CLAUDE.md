@@ -53,7 +53,7 @@ przenoszenie przez Ustawienia → kopia JSON.
 - `src/selectors.ts` – filtrowanie i sortowanie list; `nowCandidates` dla widoku Teraz (testy w `selectors.test.ts`)
 - `src/store.tsx` – DataProvider (useLiveQuery), UI context (openTask, openAssistant), ustawienia (okna planu dnia, stałe punkty, domyślny szacunek, godzina/dzień przeglądu, klucz i model AI)
 - `src/theme.ts` – motyw
-- `src/App.tsx` – układ, widoki, skróty (Q, A = asystent, G+T/I/U/S/N/C/R), toast z „Cofnij”
+- `src/App.tsx` – układ, widoki, skróty (Q, A = asystent, G+T/I/U/S/N/C/R/W/P), toast z „Cofnij”
 - `src/components/sortable.tsx` – przeciąganie (dnd-kit): uchwyt, czujniki, komunikaty po polsku
 - `src/components/BottomNav.tsx` – dolny pasek na telefonie (≤860px): Skrzynka, Dziś, Nadchodzące, Projekty; „Projekty” = widok `browse` (menu na pełny ekran: projekty, etykiety, ustawienia, motyw). Na PC pasek ukryty, menu boczne bez zmian.
 - `src/components/` – Sidebar (projekty i podprojekty z przeciąganiem), QuickAdd (podświetlanie przez warstwę „mirror”), TaskItem/TaskList/TaskTree, TaskEditor (okno), DayPlan (oś dnia: upuszczanie zadań z listy, przesuwanie bloków, zmiana długości dolną krawędzią; podgląd miejsca upuszczenia), icons
