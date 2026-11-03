@@ -7,6 +7,7 @@ import { toISO, useData, useNow, UIProvider } from './store';
 import { useTheme } from './theme';
 import type { View } from './types';
 import { Goals } from './views/Goals';
+import { Home } from './views/Home';
 import { Inbox } from './views/Inbox';
 import { Now } from './views/Now';
 import { LabelView } from './views/LabelView';
@@ -15,6 +16,7 @@ import { Review } from './views/Review';
 import { Settings } from './views/Settings';
 import { Today } from './views/Today';
 import { Upcoming } from './views/Upcoming';
+import { Week } from './views/Week';
 
 interface Toast {
   id: number;
@@ -84,7 +86,7 @@ export function App() {
         return;
       }
       if (Date.now() - gPressed.current < 1200) {
-        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' }, c: { kind: 'goals' }, n: { kind: 'now' } };
+        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' }, c: { kind: 'goals' }, n: { kind: 'now' }, w: { kind: 'week' }, p: { kind: 'home' } };
         if (map[k]) {
           e.preventDefault();
           setView(map[k]);
@@ -112,6 +114,8 @@ export function App() {
           {view.kind === 'settings' && <Settings theme={theme} />}
           {view.kind === 'goals' && <Goals />}
           {view.kind === 'now' && <Now />}
+          {view.kind === 'week' && <Week />}
+          {view.kind === 'home' && <Home />}
           {view.kind === 'review' && <Review key={view.mode} mode={view.mode} />}
         </main>
         <BottomNav />

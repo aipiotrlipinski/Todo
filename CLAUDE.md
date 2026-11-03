@@ -56,19 +56,27 @@ przenoszenie przez Ustawienia → kopia JSON.
 - `src/App.tsx` – układ, widoki, skróty (Q, A = asystent, G+T/I/U/S/N/C/R), toast z „Cofnij”
 - `src/components/sortable.tsx` – przeciąganie (dnd-kit): uchwyt, czujniki, komunikaty po polsku
 - `src/components/BottomNav.tsx` – dolny pasek na telefonie (≤860px): Skrzynka, Dziś, Nadchodzące, Projekty; „Projekty” = widok `browse` (menu na pełny ekran: projekty, etykiety, ustawienia, motyw). Na PC pasek ukryty, menu boczne bez zmian.
-- `src/components/` – Sidebar (projekty i podprojekty z przeciąganiem), QuickAdd (podświetlanie przez warstwę „mirror”), TaskItem/TaskList/TaskTree, TaskEditor (okno), DayPlan (oś dnia), icons
+- `src/components/` – Sidebar (projekty i podprojekty z przeciąganiem), QuickAdd (podświetlanie przez warstwę „mirror”), TaskItem/TaskList/TaskTree, TaskEditor (okno), DayPlan (oś dnia: upuszczanie zadań z listy, przesuwanie bloków, zmiana długości dolną krawędzią; podgląd miejsca upuszczenia), icons
 - `src/components/Assistant.tsx` – okno asystenta: dyktowanie (Web Speech API, pl-PL, gdy dostępne), podgląd propozycji z odznaczaniem i poprawą tytułów, dodanie z „Cofnij”
 - `src/views/Review.tsx` – przegląd dnia (co się udało → niedokończone po jednym → 3 najważniejsze na jutro) i tygodnia (+ skrzynka, projekty bez kroku/bez ruchu, cele, obciążenie 7 dni); baner na Dziś od `reviewTime` / w `weeklyReviewDay`
 - `src/views/Goals.tsx` – Cele: podział czasu w tygodniu, karta celu (dlaczego, statystyki, następny krok, przypięte projekty); `GoalsWeek` w przeglądzie
+- `src/components/timeDrag.tsx` – przeciąganie na oś dnia i między dniami: czujniki (mysz 4 px, dotyk przytrzymanie ~0,2 s), `minuteAt` (minuta z pozycji, co 15 min), `DraggableRow`
+- `src/week.ts` – tydzień od poniedziałku, kolumna dnia (dziś zbiera zaległe), obciążenie dnia (empty/ok/busy/over), `nextPoint` (trwający/następny punkt dnia) (testy w `week.test.ts`)
+- `src/views/Week.tsx` – Tablica tygodnia (G+W): kolumna „Bez terminu” (skrzynka) + 7 dni z paskiem obciążenia, przeciąganie zadań między dniami, ‹ › tygodnie; na telefonie jedna kolumna na ekran, start od dziś
+- `src/views/Home.tsx` – Pulpit (G+P): 3 najważniejsze dziś, następny punkt dnia, skrzynka, cele w tygodniu, obciążenie 7 dni, asystent
 - `src/views/Now.tsx` – Teraz: czas do następnego punktu dnia, zadania które się mieszczą, filtr kontekstu (etykiety)
-- `src/views/` – Today, Inbox, Upcoming, ProjectView (etapy z przeciąganiem zadań, sekcja podprojektów), LabelView, Settings, TodoistImport, Header (na telefonie okrągły przycisk „+” otwiera szybkie dodawanie od dołu)
+- `src/views/` – Today, Inbox, Upcoming, ProjectView (etapy z przeciąganiem zadań, przełącznik Lista/Tablica zapamiętywany w localStorage `plan.projectLayout`, sekcja podprojektów), LabelView, Settings, TodoistImport, Header (na telefonie okrągły przycisk „+” otwiera szybkie dodawanie od dołu)
 - `src/todoist.ts` – import z Todoist: API v1 (token, na telefonie przez CapacitorHttp) albo pliki CSV; projekty, sekcje→etapy, podzadania, etykiety, daty, powtarzanie; bez duplikatów (testy w `todoist.test.ts`)
 - `src/native.ts` + `android/.../PlanBarsPlugin.java` – w APK: wysokość paska stanu/nawigacji (`--safe-top`, `--safe-bottom` w CSS) i kolor ikon paska zgodny z motywem
 
-## Stan (2026-11-03, wersja 3: wyróżniki)
-Zrobione: 5 wyróżników z rozmowy 2026-11-03 — (1) planowanie pod realny czas: stałe punkty dnia w Ustawieniach, wolny czas po ich odjęciu, ostrzeżenie „za dużo o…” z propozycją przeniesienia na jutro, „Ułóż mój dzień”, szybki wybór czasu w oknie zadania; (2) przegląd dnia i tygodnia; (4) Cele nad projektami; (5) asystent AI (dyktowanie → zadania, „Rozpisz z AI” w projekcie); (3) widok Teraz.
-Wcześniej: płaski wygląd na telefonie, import z Todoist, dolny pasek, APK, etapy 1–2, część etapu 3, podprojekty.
-Brakuje wg planu: widok tablicy etapów (3), zapisane filtry (4), przeciąganie bloków na osi / widok tygodnia (5), PWA (7).
+## Stan (2026-11-03, wersja 4: nowe widoki)
+Zrobione 2026-11-03 (z 5 makiet wybrane 1, 2 i 5, makiety: https://claude.ai/artifact/8AWwmqPYQAwQycRSbSza2F):
+(1) oś dnia z przeciąganiem — zadanie z listy na oś = godzina, blok przesuwany, dolna krawędź = szacunek, blok upuszczony na listę traci godzinę, „Cofnij” w toaście;
+(2) tablica — widok Tydzień (7 dni + bez terminu, obciążenie, przeciąganie) i tablica etapów w projekcie (Lista/Tablica);
+(5) Pulpit w menu na samej górze.
+Wcześniej: 5 wyróżników (planowanie pod realny czas, przegląd, cele, asystent AI, Teraz), płaski wygląd na telefonie, import z Todoist, dolny pasek, APK, etapy 1–2, część etapu 3, podprojekty.
+Nie wdrożone z makiet: tryb skupienia z licznikiem (3), macierz ważne/pilne (4).
+Brakuje wg planu: zapisane filtry (4), PWA (7).
 Asystent nie był jeszcze sprawdzony na prawdziwym kluczu (testy na podstawionej odpowiedzi).
 
 Znane ograniczenia: nowa nazwa projektu/etykiety z kilku słów wymaga cudzysłowu;
@@ -89,3 +97,4 @@ przy otwartym oknie zadania kliknięcie podzadania otwiera je bez zapisu zmian r
 - [x] Cele nad projektami
 - [x] Asystent AI po polsku
 - [x] Filtr „Teraz” (mam X minut)
+- [x] Oś dnia z przeciąganiem, tablica tygodnia i etapów, Pulpit (makiety 1, 2, 5)

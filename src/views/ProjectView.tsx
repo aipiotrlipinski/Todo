@@ -1,4 +1,4 @@
-import { closestCorners, DndContext, DragOverlay, useDroppable, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
+import { closestCorners, DndContext, DragOverlay, pointerWithin, useDroppable, type CollisionDetection, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState, type ReactNode } from 'react';
 import {
@@ -24,6 +24,23 @@ import { Header } from './Header';
 
 const NONE = 'none';
 
+// Under the pointer: a task row wins over the stage around it; otherwise nearest corners (keyboard, gaps).
+const collision: CollisionDetection = (args) => {
+  const hits = pointerWithin(args);
+  const rows = hits.filter((h) => !String(h.id).startsWith('stage:'));
+  if (rows.length) return rows;
+  return hits.length ? hits : closestCorners(args);
+};
+const LAYOUT_KEY = 'plan.projectLayout';
+
+function readLayout(): 'list' | 'board' {
+  try {
+    return localStorage.getItem(LAYOUT_KEY) === 'board' ? 'board' : 'list';
+  } catch {
+    return 'list';
+  }
+}
+
 export function ProjectView({ id }: { id: string }) {
   const { tasks, stages, projects, projectById } = useData();
   const { setView, openAssistant } = useUI();
@@ -32,7 +49,16 @@ export function ProjectView({ id }: { id: string }) {
   const [editing, setEditing] = useState(false);
   const [newStage, setNewStage] = useState('');
   const [dragId, setDragId] = useState<string | null>(null);
+  const [layout, setLayout] = useState<'list' | 'board'>(readLayout);
   const sensors = useDragSensors();
+  const chooseLayout = (l: 'list' | 'board') => {
+    setLayout(l);
+    try {
+      localStorage.setItem(LAYOUT_KEY, l);
+    } catch {
+      /* ignore */
+    }
+  };
 
   if (!project) {
     return <section className="panel tasks-panel"><p className="empty">Ten projekt już nie istnieje.</p></section>;
@@ -95,6 +121,10 @@ export function ProjectView({ id }: { id: string }) {
         defaults={{ projectId: id }}
         actions={
           <>
+            <div className="segmented layout-switch" role="group" aria-label="Układ projektu">
+              <button type="button" aria-pressed={layout === 'list'} className={layout === 'list' ? 'on' : ''} onClick={() => chooseLayout('list')}>Lista</button>
+              <button type="button" aria-pressed={layout === 'board'} className={layout === 'board' ? 'on' : ''} onClick={() => chooseLayout('board')}>Tablica</button>
+            </div>
             <button type="button" className="secondary-btn" onClick={() => openAssistant(id)} title="Asystent AI zaproponuje etapy i kroki">
               <IconSpark /> Rozpisz z AI
             </button>
@@ -123,8 +153,9 @@ export function ProjectView({ id }: { id: string }) {
         {editing && <ProjectSettings project={project} hasSubs={subs.length > 0} onDeleted={() => setView(parent ? { kind: 'project', id: parent.id } : { kind: 'today' })} />}
       </Header>
 
-      <section className="panel tasks-panel" aria-label="Zadania projektu">
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragId(null)} accessibility={dragA11y}>
+      <section className={`panel tasks-panel${layout === 'board' ? ' board-mode' : ''}`} aria-label="Zadania projektu">
+        <DndContext sensors={sensors} collisionDetection={collision} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragId(null)} accessibility={dragA11y}>
+          <div className={layout === 'board' && myStages.length ? 'stage-board' : 'stage-stack'}>
           {(lists.get(NONE)!.length > 0 || myStages.length === 0) && (
             <Container id={NONE} title={myStages.length ? 'Bez etapu' : undefined}>
               <SortableTasks list={lists.get(NONE)!} all={tasks} empty={myStages.length ? undefined : 'Brak zadań. Dodaj pierwsze powyżej albo podziel projekt na etapy poniżej.'} />
@@ -136,6 +167,7 @@ export function ProjectView({ id }: { id: string }) {
               <QuickAdd compact label={`Dodaj zadanie do etapu ${s.name}`} defaults={{ projectId: id, stageId: s.id }} placeholder="Dodaj zadanie do tego etapu" />
             </Container>
           ))}
+          </div>
           <DragOverlay>{dragged ? <div className="drag-ghost"><TaskItem task={dragged} hideProject /></div> : null}</DragOverlay>
         </DndContext>
         <div className="add-stage">

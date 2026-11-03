@@ -115,5 +115,8 @@ export type View =
   | { kind: 'review'; mode: 'day' | 'week' }
   | { kind: 'goals' }
   | { kind: 'now' }
+  | { kind: 'week' }
+  /** Dashboard (Pulpit) */
+  | { kind: 'home' }
   /** Phone only: the menu (projects, labels, settings) as a full screen. */
   | { kind: 'browse' };

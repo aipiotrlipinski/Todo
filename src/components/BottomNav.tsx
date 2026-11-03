@@ -9,7 +9,7 @@ export function BottomNav() {
   const { view, setView, today } = useUI();
   const t = todayTasks(tasks, today);
   const counts = { inbox: inboxTasks(tasks).length, today: t.today.length + t.overdue.length };
-  const inMenu = ['browse', 'project', 'label', 'settings', 'review', 'goals', 'now'].includes(view.kind);
+  const inMenu = ['browse', 'project', 'label', 'settings', 'review', 'goals', 'now', 'week', 'home'].includes(view.kind);
 
   const tab = (v: View, label: string, icon: JSX.Element, on: boolean, count?: number) => (
     <button type="button" className={`tab${on ? ' active' : ''}`} onClick={() => setView(v)} aria-current={on ? 'page' : undefined}>

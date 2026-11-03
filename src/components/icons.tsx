@@ -75,3 +75,9 @@ export const IconNow = () => (
 export const IconSpark = () => (
   <svg {...base}><path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4L4 8.5l4.4-1.6L10 2.5zM15.5 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z" /></svg>
 );
+export const IconHome = () => (
+  <svg {...base}><rect x="3" y="3" width="6" height="8" rx="1.5" /><rect x="11" y="3" width="6" height="5" rx="1.5" /><rect x="3" y="13" width="6" height="4" rx="1.5" /><rect x="11" y="10" width="6" height="7" rx="1.5" /></svg>
+);
+export const IconBoard = () => (
+  <svg {...base}><rect x="2.5" y="3.5" width="4" height="13" rx="1.2" /><rect x="8" y="3.5" width="4" height="9" rx="1.2" /><rect x="13.5" y="3.5" width="4" height="11" rx="1.2" /></svg>
+);
