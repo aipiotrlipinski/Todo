@@ -14,7 +14,7 @@ import {
 } from '../actions';
 import { QuickAdd } from '../components/QuickAdd';
 import { TaskItem, TaskTree } from '../components/TaskItem';
-import { IconTrash } from '../components/icons';
+import { IconSpark, IconTrash } from '../components/icons';
 import { dragA11y, SortableRow, useDragSensors } from '../components/sortable';
 import { formatMinutes } from '../dates';
 import { childrenOf, projectProgress, subprojectsOf, topProjects } from '../selectors';
@@ -26,7 +26,7 @@ const NONE = 'none';
 
 export function ProjectView({ id }: { id: string }) {
   const { tasks, stages, projects, projectById } = useData();
-  const { setView } = useUI();
+  const { setView, openAssistant } = useUI();
   const project = projectById.get(id);
   const [showDone, setShowDone] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -95,6 +95,9 @@ export function ProjectView({ id }: { id: string }) {
         defaults={{ projectId: id }}
         actions={
           <>
+            <button type="button" className="secondary-btn" onClick={() => openAssistant(id)} title="Asystent AI zaproponuje etapy i kroki">
+              <IconSpark /> Rozpisz z AI
+            </button>
             <button type="button" className="secondary-btn" onClick={() => setShowDone((v) => !v)} aria-pressed={showDone}>
               {showDone ? 'Ukryj zrobione' : 'Pokaż zrobione'}
             </button>

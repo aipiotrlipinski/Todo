@@ -59,6 +59,7 @@ export interface UI {
   view: View;
   setView: (v: View) => void;
   openTask: (id: string | null) => void;
+  openAssistant: (projectId?: string) => void;
   toast: (message: string, undo?: () => void) => void;
   now: Date;
   today: string;

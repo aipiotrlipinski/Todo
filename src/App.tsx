@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Assistant, type AssistantMode } from './components/Assistant';
 import { BottomNav } from './components/BottomNav';
 import { Sidebar } from './components/Sidebar';
 import { TaskEditor } from './components/TaskEditor';
@@ -41,6 +42,8 @@ export function App() {
   const { tasks } = useData();
   const [view, setViewState] = useState<View>(readView);
   const [editing, setEditing] = useState<string | null>(null);
+  const [assistant, setAssistant] = useState<AssistantMode | null>(null);
+  const openAssistant = useCallback((projectId?: string) => setAssistant(projectId ? { mode: 'breakdown', projectId } : { mode: 'capture' }), []);
   const [toastItem, setToast] = useState<Toast | null>(null);
   const toastTimer = useRef<number>();
   const gPressed = useRef(0);
@@ -63,8 +66,13 @@ export function App() {
   // Keyboard: Q = quick add, G then T/I/U = go to view
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || typingIn(e.target) || editing) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || typingIn(e.target) || editing || assistant) return;
       const k = e.key.toLowerCase();
+      if (k === 'a') {
+        e.preventDefault();
+        setAssistant({ mode: 'capture' });
+        return;
+      }
       if (k === 'q') {
         e.preventDefault();
         document.getElementById('quick-add')?.focus();
@@ -85,12 +93,12 @@ export function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [editing, setView]);
+  }, [editing, assistant, setView]);
 
   const editingTask = editing ? tasks.find((t) => t.id === editing) : undefined;
 
   return (
-    <UIProvider value={{ view, setView, openTask: setEditing, toast, now, today: toISO(now) }}>
+    <UIProvider value={{ view, setView, openTask: setEditing, openAssistant, toast, now, today: toISO(now) }}>
       <div className={`app${view.kind === 'browse' ? ' view-browse' : ''}`}>
         <Sidebar theme={theme} />
         <main className="main" key={view.kind + ('id' in view ? view.id : '') + ('mode' in view ? view.mode : '')}>
@@ -107,6 +115,7 @@ export function App() {
         <BottomNav />
       </div>
       {editingTask && <TaskEditor key={editingTask.id} task={editingTask} />}
+      {assistant && <Assistant opts={assistant} onClose={() => setAssistant(null)} />}
       {toastItem && (
         <div className="toast" role="status" key={toastItem.id}>
           <span>{toastItem.message}</span>

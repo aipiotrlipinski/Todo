@@ -3,6 +3,7 @@ import { exportAll, importAll, setSetting } from '../actions';
 import { daysBetween, formatLong, WEEKDAYS, WEEKDAYS_SHORT } from '../dates';
 import { newId } from '../db';
 import type { FixedBlock } from '../planner';
+import { AI_MODELS } from '../ai';
 import { useData, useUI, type PlanWindow } from '../store';
 import type { ThemePref } from '../theme';
 import { Header } from './Header';
@@ -112,6 +113,8 @@ export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: Them
           </div>
         </div>
 
+        <AiSettings />
+
         <TodoistImport />
 
         <div className="settings-group">
@@ -142,7 +145,7 @@ export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: Them
         <div className="settings-group">
           <h2 className="panel-title">Skróty klawiszowe</h2>
           <ul className="shortcuts">
-            <li><kbd>Q</kbd> szybkie dodawanie</li>
+            <li><kbd>Q</kbd> szybkie dodawanie · <kbd>A</kbd> asystent AI</li>
             <li><kbd>G</kbd> <kbd>T</kbd> Dziś · <kbd>G</kbd> <kbd>I</kbd> Skrzynka · <kbd>G</kbd> <kbd>U</kbd> Nadchodzące</li>
             <li><kbd>Esc</kbd> zamknij okno · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> zapisz zadanie</li>
           </ul>
@@ -184,6 +187,38 @@ function FixedBlocks({ list }: { list: FixedBlock[] }) {
         </div>
       ))}
       <button type="button" className="secondary-btn" onClick={add}>+ Dodaj stały punkt</button>
+    </div>
+  );
+}
+
+function AiSettings() {
+  const { settings } = useData();
+  const [key, setKey] = useState(settings.aiKey);
+  const [show, setShow] = useState(false);
+  return (
+    <div className="settings-group">
+      <h2 className="panel-title">Asystent AI</h2>
+      <p className="muted small">
+        Asystent zamienia opis lub dyktowanie w zadania i rozpisuje projekty na kroki. Działa na Twoim kluczu API z console.anthropic.com
+        (płacisz za użycie, zwykle grosze miesięcznie). Klucz zostaje tylko na tym urządzeniu i nie trafia do kopii zapasowej.
+      </p>
+      <div className="field-row">
+        <label className="field">
+          <span>Klucz API</span>
+          <input type={show ? 'text' : 'password'} value={key} placeholder="sk-ant-…" autoComplete="off" spellCheck={false}
+            onChange={(e) => setKey(e.target.value)} onBlur={() => key !== settings.aiKey && setSetting('aiKey', key.trim())} />
+        </label>
+        <label className="field">
+          <span>Model</span>
+          <select value={settings.aiModel} onChange={(e) => setSetting('aiModel', e.target.value)}>
+            {AI_MODELS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+        </label>
+      </div>
+      <div className="button-row">
+        <button type="button" className="link-btn" onClick={() => setShow((v) => !v)}>{show ? 'Ukryj klucz' : 'Pokaż klucz'}</button>
+        {settings.aiKey && <button type="button" className="link-btn warn" onClick={() => { setKey(''); setSetting('aiKey', ''); }}>Usuń klucz</button>}
+      </div>
     </div>
   );
 }

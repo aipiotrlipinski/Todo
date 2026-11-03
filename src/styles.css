@@ -749,3 +749,35 @@ kbd {
   .goal-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .goal-card { margin-bottom: 4px; }
 }
+
+/* ---------- Assistant ---------- */
+.quick-add-head { gap: 14px; }
+.quick-add-head .spacer { flex: 1; }
+.ai-link { display: inline-flex; align-items: center; gap: 4px; }
+.ai-link svg, .dialog-title svg, .secondary-btn svg { width: 15px; height: 15px; }
+.dialog-title { display: inline-flex; align-items: center; gap: 8px; }
+.assistant { width: min(680px, 100%); }
+.ai-input { position: relative; }
+.ai-input textarea {
+  width: 100%; border-radius: 14px; border: 1px solid var(--input-border); background: var(--input);
+  color: var(--text); padding: 12px 52px 12px 14px; font: inherit; font-size: 15px; resize: vertical;
+}
+.ai-input textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.mic {
+  position: absolute; right: 10px; top: 10px; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--row-border); background: var(--panel); font-size: 15px;
+}
+.mic.on { background: var(--p1); color: #fff; border-color: var(--p1); animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--p1) 25%, transparent); } }
+.listening { color: var(--p1); font-weight: 600; }
+.proposals { display: flex; flex-direction: column; gap: 4px; max-height: 55vh; overflow-y: auto; }
+.proposal-group .stage-head { margin: 10px 0 4px; font-size: 13px; }
+.proposal { display: flex; gap: 10px; align-items: flex-start; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+.proposal input[type='checkbox'] { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+.proposal.off .proposal-body { opacity: 0.45; }
+.proposal-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.proposal-title {
+  border: none; background: none; font: inherit; font-size: 14.5px; font-weight: 600; color: var(--text); padding: 0;
+  border-bottom: 1px solid transparent;
+}
+.proposal-title:focus { outline: none; border-bottom-color: var(--accent); }

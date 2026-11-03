@@ -1,4 +1,5 @@
 import { db, newId } from './db';
+import type { AiTask } from './ai';
 import type { NamedRef, Parsed } from './parser';
 import { nextDueAfterDone } from './recurrence';
 import type { Goal, Label, Project, Stage, Task } from './types';
@@ -270,7 +271,7 @@ export async function exportAll() {
     db.labels.toArray(),
     db.filters.toArray(),
     db.blocks.toArray(),
-    db.settings.toArray(),
+    db.settings.toArray().then((rows) => rows.filter((r) => r.key !== 'aiKey')),
     db.goals.toArray(),
   ]);
   return { app: 'plan', version: 1, exportedAt: new Date().toISOString(), tasks, projects, stages, labels, filters, blocks, settings, goals };
@@ -281,6 +282,7 @@ export async function importAll(data: unknown) {
   if (!d || d.app !== 'plan' || !Array.isArray(d.tasks)) throw new Error('To nie jest plik kopii z tej aplikacji.');
   const arr = <T,>(k: string) => (Array.isArray(d[k]) ? (d[k] as T[]) : []);
   await db.transaction('rw', [db.tasks, db.projects, db.stages, db.labels, db.filters, db.blocks, db.settings, db.goals], async () => {
+    const key = await db.settings.get('aiKey'); // the API key stays on this device
     await Promise.all([db.tasks.clear(), db.projects.clear(), db.stages.clear(), db.labels.clear(), db.filters.clear(), db.blocks.clear(), db.settings.clear(), db.goals.clear()]);
     await db.tasks.bulkAdd(arr('tasks'));
     await db.projects.bulkAdd(arr<Project>('projects').map((p) => ({ ...p, parentId: p.parentId ?? null, goalId: p.goalId ?? null })));
@@ -289,6 +291,44 @@ export async function importAll(data: unknown) {
     await db.labels.bulkAdd(arr('labels'));
     await db.filters.bulkAdd(arr('filters'));
     await db.blocks.bulkAdd(arr('blocks'));
-    await db.settings.bulkAdd(arr('settings'));
+    await db.settings.bulkPut(arr<{ key: string; value: unknown }>('settings').filter((r) => r.key !== 'aiKey'));
+    if (key) await db.settings.put(key);
+  });
+}
+
+// ---- Assistant ----------------------------------------------------------
+
+/**
+ * Adds tasks proposed by the assistant. Project/stage are matched by name to existing ones;
+ * with createStages a missing stage of the target project is created. Returns the new top-level tasks.
+ */
+export async function addAiTasks(items: AiTask[], opts: { projectId?: string | null; createStages?: boolean } = {}): Promise<Task[]> {
+  return db.transaction('rw', [db.tasks, db.projects, db.stages, db.labels], async () => {
+    const projects = await db.projects.toArray();
+    const created: Task[] = [];
+    let order = now();
+    const findProject = (name: string | null) =>
+      name ? projects.find((p) => p.name.toLowerCase() === name.toLowerCase() && p.status !== 'done') : undefined;
+    for (const it of items) {
+      const projectId = opts.projectId ?? findProject(it.project)?.id ?? null;
+      let stageId: string | null = null;
+      if (projectId && it.stage) {
+        const st = (await db.stages.where('projectId').equals(projectId).toArray()).find((x) => x.name.toLowerCase() === it.stage!.toLowerCase());
+        stageId = st?.id ?? (opts.createStages ? (await createStage(projectId, it.stage)).id : null);
+      }
+      const labels = await ensureLabels(it.labels.map((n) => ({ id: null, name: n })));
+      const base = { notes: '', labels: [] as string[], recurrence: null, status: 'open' as const, completedAt: null, createdAt: now(), updatedAt: now() };
+      const t: Task = {
+        ...base,
+        id: newId(), title: it.title, notes: it.notes, projectId, stageId, parentId: null,
+        due: it.due, time: it.time, priority: it.priority, labels, estimate: it.estimate, order: order++,
+      };
+      await db.tasks.add(t);
+      created.push(t);
+      for (const st of it.subtasks) {
+        await db.tasks.add({ ...base, id: newId(), title: st, projectId, stageId, parentId: t.id, due: null, time: null, priority: 4, estimate: null, order: order++ });
+      }
+    }
+    return created;
   });
 }

@@ -4,6 +4,7 @@ import { formatDue, formatMinutes } from '../dates';
 import { parseQuickAdd, type Token } from '../parser';
 import { describeRecurrence } from '../recurrence';
 import { useData, useUI } from '../store';
+import { IconSpark } from './icons';
 
 interface Props {
   defaults?: TaskDefaults;
@@ -28,7 +29,7 @@ const KIND_CLASS: Record<Token['kind'], string> = {
 
 export function QuickAdd({ defaults = {}, placeholder, id, compact, label = 'Szybkie dodawanie', autoFocus }: Props) {
   const { projects, stages, labels, projectById, stageById } = useData();
-  const { today, toast } = useUI();
+  const { today, toast, openAssistant } = useUI();
   const [text, setText] = useState('');
   const [showHelp, setShowHelp] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +81,10 @@ export function QuickAdd({ defaults = {}, placeholder, id, compact, label = 'Szy
       {!compact && (
         <div className="quick-add-head">
           <label htmlFor={id}>{label}{id === 'quick-add' ? ' · Q' : ''}</label>
+          <span className="spacer" />
+          <button type="button" className="link-btn ai-link" onClick={() => openAssistant()} title="Opisz kilka spraw naraz albo podyktuj — asystent AI zrobi z tego zadania (skrót A)">
+            <IconSpark /> Asystent
+          </button>
           <button type="button" className="link-btn" onClick={() => setShowHelp((v) => !v)} aria-expanded={showHelp}>
             {showHelp ? 'Ukryj podpowiedzi' : 'Jak to działa?'}
           </button>
