@@ -6,13 +6,14 @@ import { capacity } from '../planner';
 import { childrenOf, isOpen, sortTasks, subprojectsOf, topProjects } from '../selectors';
 import { planWindowFor, useData, useUI } from '../store';
 import type { Task } from '../types';
+import { GoalsWeek } from './Goals';
 import { Header } from './Header';
 
 type Step = 'done' | 'overdue' | 'inbox' | 'projects' | 'goals' | 'tomorrow' | 'week' | 'finish';
 
 const STEPS: Record<'day' | 'week', Step[]> = {
   day: ['done', 'overdue', 'tomorrow', 'finish'],
-  week: ['done', 'inbox', 'overdue', 'projects', 'week', 'finish'],
+  week: ['done', 'inbox', 'overdue', 'projects', 'goals', 'week', 'finish'],
 };
 
 const TITLES: Record<Step, string> = {
@@ -63,6 +64,7 @@ export function Review({ mode }: { mode: 'day' | 'week' }) {
         {step === 'overdue' && <TriageStep queue={tasks.filter((t) => isOpen(t) && !t.parentId && t.due && (mode === 'day' ? t.due <= today : t.due < today)).sort(sortTasks)} empty="Nic nie zostało. Wszystko z terminem na dziś jest zamknięte." />}
         {step === 'inbox' && <TriageStep inbox queue={tasks.filter((t) => isOpen(t) && !t.projectId && !t.parentId && !t.due).sort((a, b) => a.order - b.order)} empty="Skrzynka pusta. Wszystko ma swoje miejsce." />}
         {step === 'projects' && <ProjectsStep />}
+        {step === 'goals' && <GoalsWeek />}
         {step === 'tomorrow' && <TomorrowStep />}
         {step === 'week' && <WeekStep />}
         {step === 'finish' && <FinishStep mode={mode} />}

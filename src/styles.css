@@ -712,3 +712,40 @@ kbd {
   .week-num { grid-column: 2; margin-top: -6px; }
   .triage-actions .secondary-btn, .triage-actions .danger-btn { height: 38px; padding: 0 12px; }
 }
+
+/* ---------- Goals ---------- */
+.split { display: flex; flex-direction: column; gap: 8px; }
+.split-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; gap: 2px; background: var(--track); }
+.split-bar span { min-width: 4px; }
+.split-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--text-soft); }
+.split-legend .dot { margin-right: 6px; }
+.goals { gap: 14px; }
+.goal-card {
+  border: 1px solid var(--row-border); border-radius: 18px; padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: inset 4px 0 0 var(--goal);
+}
+.goal-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.goal-name {
+  flex: 1 1 200px; border: none; background: none; font: inherit; font-size: 19px; font-weight: 700; color: var(--text);
+  padding: 2px 0; border-bottom: 1px solid transparent;
+}
+.goal-name:focus { outline: none; border-bottom-color: var(--accent); }
+.small-swatches .swatch { width: 18px; height: 18px; }
+.goal-why { font-style: italic; }
+.goal-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.goal-stats > div { background: var(--sub); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.goal-stats strong { font-size: 16px; }
+.goal-stats .up { color: var(--green-text); }
+.goal-stats .down { color: var(--warn-text); }
+.goal-projects { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.goal-project { gap: 4px; padding: 4px 6px 4px 10px; }
+.link-plain { border: none; background: none; padding: 0; color: inherit; font: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.chip-x { border: none; background: none; color: var(--muted); padding: 0 4px; font-size: 14px; line-height: 1; }
+.goal-actions { display: flex; align-items: center; }
+.goal-card .warn-chip { align-self: flex-start; }
+.goal-card .triage-select { height: 30px; font-size: 12.5px; }
+@media (max-width: 860px) {
+  .goal-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .goal-card { margin-bottom: 4px; }
+}

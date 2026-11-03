@@ -5,6 +5,7 @@ import { TaskEditor } from './components/TaskEditor';
 import { toISO, useData, useNow, UIProvider } from './store';
 import { useTheme } from './theme';
 import type { View } from './types';
+import { Goals } from './views/Goals';
 import { Inbox } from './views/Inbox';
 import { LabelView } from './views/LabelView';
 import { ProjectView } from './views/ProjectView';
@@ -74,7 +75,7 @@ export function App() {
         return;
       }
       if (Date.now() - gPressed.current < 1200) {
-        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' } };
+        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' }, c: { kind: 'goals' } };
         if (map[k]) {
           e.preventDefault();
           setView(map[k]);
@@ -100,6 +101,7 @@ export function App() {
           {view.kind === 'project' && <ProjectView id={view.id} />}
           {view.kind === 'label' && <LabelView id={view.id} />}
           {view.kind === 'settings' && <Settings theme={theme} />}
+          {view.kind === 'goals' && <Goals />}
           {view.kind === 'review' && <Review key={view.mode} mode={view.mode} />}
         </main>
         <BottomNav />

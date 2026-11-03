@@ -289,7 +289,8 @@ function Subprojects({ parent, subs }: { parent: Project; subs: Project[] }) {
 }
 
 function ProjectSettings({ project, hasSubs, onDeleted }: { project: Project; hasSubs: boolean; onDeleted: () => void }) {
-  const { projects } = useData();
+  const { projects, goals, projectById } = useData();
+  const parentGoal = project.parentId ? projectById.get(project.parentId)?.goalId : null;
   const [name, setName] = useState(project.name);
   const [goal, setGoal] = useState(project.goal);
   const [confirm, setConfirm] = useState(false);
@@ -304,6 +305,15 @@ function ProjectSettings({ project, hasSubs, onDeleted }: { project: Project; ha
         <label className="field">
           <span>Cel projektu</span>
           <input value={goal} onChange={(e) => setGoal(e.target.value)} onBlur={() => updateProject(project.id, { goal })} placeholder="Co ma być efektem?" />
+        </label>
+        <label className="field">
+          <span>Służy celowi</span>
+          <select value={project.goalId ?? ''} onChange={(e) => updateProject(project.id, { goalId: e.target.value || null })}>
+            <option value="">{parentGoal ? `jak projekt główny (${goals.find((g) => g.id === parentGoal)?.name ?? '—'})` : '— bez celu —'}</option>
+            {goals.filter((g) => g.status === 'active').map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
         </label>
         <label className="field">
           <span>Należy do projektu</span>

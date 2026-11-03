@@ -7,7 +7,7 @@ import { inboxTasks, projectProgress, subprojectsOf, todayTasks, topProjects } f
 import { useData, useUI } from '../store';
 import type { ThemePref } from '../theme';
 import type { Project, View } from '../types';
-import { IconInbox, IconLogo, IconMoon, IconPlus, IconReview, IconSettings, IconSun, IconToday, IconUpcoming } from './icons';
+import { IconInbox, IconLogo, IconMoon, IconGoal, IconPlus, IconReview, IconSettings, IconSun, IconToday, IconUpcoming } from './icons';
 import { dragA11y, SortableRow, useDragSensors } from './sortable';
 
 interface Props {
@@ -118,6 +118,7 @@ export function Sidebar({ theme }: Props) {
       </div>
 
       <div className="nav-group nav-extra">
+        {nav({ kind: 'goals' }, 'Cele', <IconGoal />)}
         {nav({ kind: 'review', mode: 'day' }, 'Przegląd dnia', <IconReview />)}
         {nav({ kind: 'review', mode: 'week' }, 'Przegląd tygodnia', <IconReview />)}
       </div>
