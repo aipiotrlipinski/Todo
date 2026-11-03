@@ -4,21 +4,23 @@ import { useState } from 'react';
 import { createProject, reorderProjects, setProjectParent } from '../actions';
 import { daysBetween } from '../dates';
 import { inboxTasks, projectProgress, subprojectsOf, todayTasks, topProjects } from '../selectors';
+import { routinesLeftToday } from '../routines';
 import { useData, useUI } from '../store';
 import type { ThemePref } from '../theme';
 import type { Project, View } from '../types';
-import { IconBoard, IconHome, IconInbox, IconLogo, IconMoon, IconGoal, IconNow, IconPlus, IconReview, IconSettings, IconSun, IconToday, IconUpcoming } from './icons';
+import { IconBoard, IconHome, IconInbox, IconLogo, IconMoon, IconGoal, IconNow, IconPlus, IconReview, IconRoutine, IconSettings, IconSun, IconToday, IconUpcoming } from './icons';
 import { dragA11y, SortableRow, useDragSensors } from './sortable';
 
 interface Props {
   theme: { resolved: 'light' | 'dark'; choose: (p: ThemePref) => void };
 }
 
-const same = (a: View, b: View) =>
+const same = (a: View, b: View) => (a.kind === 'goal' && b.kind === 'goals') || sameExact(a, b);
+const sameExact = (a: View, b: View) =>
   a.kind === b.kind && ('id' in a ? a.id === (b as { id?: string }).id : true) && ('mode' in a ? a.mode === (b as { mode?: string }).mode : true);
 
 export function Sidebar({ theme }: Props) {
-  const { tasks, projects, labels, settings, projectById } = useData();
+  const { tasks, projects, labels, settings, projectById, routines, routineDone } = useData();
   const { view, setView, today } = useUI();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
@@ -26,6 +28,7 @@ export function Sidebar({ theme }: Props) {
 
   const t = todayTasks(tasks, today);
   const counts = { inbox: inboxTasks(tasks).length, today: t.today.length + t.overdue.length };
+  const routinesLeft = routinesLeftToday(routines, routineDone, today);
   const backupOld = !settings.lastExport || daysBetween(settings.lastExport.slice(0, 10), today) >= 7;
   const hasData = tasks.length > 0;
   const active = projects.filter((p) => p.status !== 'done');
@@ -120,8 +123,9 @@ export function Sidebar({ theme }: Props) {
       </div>
 
       <div className="nav-group nav-extra">
-        {nav({ kind: 'now' }, 'Teraz', <IconNow />)}
+        {nav({ kind: 'routines' }, 'Rutyny', <IconRoutine />, routinesLeft)}
         {nav({ kind: 'goals' }, 'Cele', <IconGoal />)}
+        {nav({ kind: 'now' }, 'Teraz', <IconNow />)}
         {nav({ kind: 'review', mode: 'day' }, 'Przegląd dnia', <IconReview />)}
         {nav({ kind: 'review', mode: 'week' }, 'Przegląd tygodnia', <IconReview />)}
       </div>

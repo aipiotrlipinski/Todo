@@ -458,10 +458,10 @@ kbd {
   .tab {
     flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px;
     padding: 6px 2px; border: none; border-radius: 12px; background: none; color: var(--muted);
-    font-size: 11.5px; font-weight: 600;
+    font-size: 10.5px; font-weight: 600; letter-spacing: -0.1px;
   }
   .tab-icon {
-    position: relative; width: 52px; height: 28px; border-radius: 14px;
+    position: relative; width: 44px; height: 28px; border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
   }
   .tab-icon svg { width: 21px; height: 21px; }
@@ -473,6 +473,9 @@ kbd {
     border-radius: 9px; background: var(--accent); color: var(--on-accent);
     font-size: 10.5px; line-height: 17px; text-align: center;
   }
+  /* six tabs: tighter on very narrow phones */
+  .bottom-nav { padding-left: 2px; padding-right: 2px; }
+  .tab { padding: 6px 0; }
   .plan { position: static; }
   .header { padding: 18px; }
   .tasks-panel, .plan { padding: 16px; }
@@ -748,6 +751,69 @@ kbd {
 @media (max-width: 860px) {
   .goal-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .goal-card { margin-bottom: 4px; }
+}
+
+/* ---------- Goals: list and goal screen ---------- */
+.goal-list { display: flex; flex-direction: column; gap: 10px; }
+.goal-row {
+  display: flex; flex-direction: column; gap: 8px; text-align: left; width: 100%;
+  border: 1px solid var(--row-border); border-radius: 16px; padding: 14px 16px; background: var(--panel); color: var(--text);
+  box-shadow: inset 4px 0 0 var(--goal); font: inherit; cursor: pointer;
+}
+.goal-row:hover { border-color: var(--goal); }
+.goal-row-top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.goal-row-name { flex: 1 1 160px; font-size: 16.5px; font-weight: 700; }
+.goal-row-due { font-size: 13px; font-weight: 600; color: var(--text-soft); }
+.goal-row-due.soon { color: var(--p2); }
+.goal-row-due.late { color: var(--p1); }
+.goal-row-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.goal-bar { position: relative; overflow: visible; height: 6px; }
+.goal-bar.thick { height: 8px; }
+.goal-bar > span { border-radius: 3px; }
+.time-mark {
+  position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px;
+  background: var(--text-soft); opacity: 0.7;
+}
+.goal-add { flex-wrap: wrap; }
+.goal-due-input { display: inline-flex; align-items: center; gap: 8px; }
+.goal-due-input .inline-input { width: auto; min-width: 150px; }
+.goal-project-panel { gap: 10px; }
+.goal-project-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.goal-sub { display: flex; flex-direction: column; gap: 6px; padding-left: 14px; border-left: 2px solid var(--line); }
+
+/* ---------- Routines ---------- */
+.day-switch { display: flex; align-items: center; gap: 6px; }
+.day-switch .icon-btn { font-size: 20px; line-height: 1; }
+.routine-progress { margin-top: 4px; }
+.routine-progress > span.full { background: var(--green-text, var(--accent)); }
+.routines { gap: 14px; }
+.routine-group { display: flex; flex-direction: column; gap: 6px; }
+.routine .check { width: 24px; height: 24px; border-radius: 8px; }
+.routine.done .task-title { text-decoration: none; color: var(--muted); }
+.streak { color: var(--p2); font-weight: 600; }
+.routine-week { display: flex; gap: 3px; flex: none; }
+.rd {
+  width: 18px; height: 18px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9.5px; font-weight: 700; color: var(--muted); background: var(--track);
+}
+.rd.ok { background: var(--accent); color: var(--on-accent); }
+.rd.miss { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); }
+.rd.off { background: transparent; opacity: 0.35; }
+.routine-off { border: none; background: none; width: 100%; text-align: left; font: inherit; color: var(--text-soft); display: flex; gap: 10px; align-items: center; }
+.routine-other summary { cursor: pointer; padding: 4px 2px; }
+.routine-add { display: flex; flex-direction: column; gap: 8px; }
+.routine-add-opts, .routine-editor-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.routine-editor-row .spacer { flex: 1; }
+.routine-editor {
+  display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px;
+  border: 1px solid var(--accent); background: var(--sub);
+}
+.routine-editor .weekday-picker button, .routine-add-opts .weekday-picker button { min-width: 40px; height: 34px; }
+@media (max-width: 860px) {
+  .routine-week .rd { width: 15px; height: 15px; font-size: 8.5px; border-radius: 5px; }
+  .routine-week { gap: 2px; }
+  .goal-due-input { width: 100%; }
+  .goal-due-input .inline-input { flex: 1; }
 }
 
 /* ---------- Assistant ---------- */

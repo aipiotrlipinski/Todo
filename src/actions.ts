@@ -2,7 +2,8 @@ import { db, newId } from './db';
 import type { AiTask } from './ai';
 import type { NamedRef, Parsed } from './parser';
 import { nextDueAfterDone } from './recurrence';
-import type { Goal, Label, Project, Stage, Task } from './types';
+import { checkId } from './routines';
+import type { Goal, Label, Project, Routine, Stage, Task } from './types';
 
 export const PROJECT_COLORS = ['#6D4AFF', '#1F9D6B', '#E07B12', '#2F7BE5', '#D6457A', '#8A6B2E', '#4B9DB0', '#7B8494'];
 
@@ -250,6 +251,55 @@ export async function deleteGoal(id: string) {
   });
 }
 
+// ---- Routines -----------------------------------------------------------
+
+export async function createRoutine(name: string, weekdays: number[] = [], part: Routine['part'] = null): Promise<Routine> {
+  const r: Routine = { id: newId(), name: name.trim(), weekdays, part, status: 'active', order: now(), createdAt: now(), updatedAt: now() };
+  await db.routines.add(r);
+  return r;
+}
+
+export async function updateRoutine(id: string, changes: Partial<Routine>) {
+  await db.routines.update(id, { ...changes, updatedAt: now() });
+}
+
+/** Deletes a routine with its history; returns what is needed to undo. */
+export async function deleteRoutine(id: string) {
+  return db.transaction('rw', [db.routines, db.routineChecks], async () => {
+    const routine = await db.routines.get(id);
+    const checks = await db.routineChecks.where('routineId').equals(id).toArray();
+    await db.routineChecks.bulkDelete(checks.map((c) => c.id));
+    await db.routines.delete(id);
+    return { routine, checks };
+  });
+}
+
+export async function restoreRoutine(snap: Awaited<ReturnType<typeof deleteRoutine>>) {
+  if (!snap.routine) return;
+  await db.transaction('rw', [db.routines, db.routineChecks], async () => {
+    await db.routines.put(snap.routine!);
+    await db.routineChecks.bulkPut(snap.checks);
+  });
+}
+
+export async function reorderRoutines(ids: string[]) {
+  await db.transaction('rw', db.routines, async () => {
+    const base = now();
+    for (let i = 0; i < ids.length; i++) await db.routines.update(ids[i], { order: base + i });
+  });
+}
+
+/** Ticks or unticks a routine on a day. Returns the new state. */
+export async function toggleRoutine(routineId: string, date: string): Promise<boolean> {
+  const id = checkId(routineId, date);
+  if (await db.routineChecks.get(id)) {
+    await db.routineChecks.delete(id);
+    return false;
+  }
+  await db.routineChecks.put({ id, routineId, date, at: now() });
+  return true;
+}
+
 /** Sets many task changes at once (auto-planning, review). */
 export async function updateTasks(changes: { id: string; changes: Partial<Task> }[]) {
   await db.transaction('rw', db.tasks, async () => {
@@ -264,7 +314,7 @@ export async function setSetting(key: string, value: unknown) {
 // ---- Backup -------------------------------------------------------------
 
 export async function exportAll() {
-  const [tasks, projects, stages, labels, filters, blocks, settings, goals] = await Promise.all([
+  const [tasks, projects, stages, labels, filters, blocks, settings, goals, routines, routineChecks] = await Promise.all([
     db.tasks.toArray(),
     db.projects.toArray(),
     db.stages.toArray(),
@@ -273,17 +323,21 @@ export async function exportAll() {
     db.blocks.toArray(),
     db.settings.toArray().then((rows) => rows.filter((r) => r.key !== 'aiKey')),
     db.goals.toArray(),
+    db.routines.toArray(),
+    db.routineChecks.toArray(),
   ]);
-  return { app: 'plan', version: 1, exportedAt: new Date().toISOString(), tasks, projects, stages, labels, filters, blocks, settings, goals };
+  return { app: 'plan', version: 1, exportedAt: new Date().toISOString(), tasks, projects, stages, labels, filters, blocks, settings, goals, routines, routineChecks };
 }
 
 export async function importAll(data: unknown) {
   const d = data as Record<string, unknown>;
   if (!d || d.app !== 'plan' || !Array.isArray(d.tasks)) throw new Error('To nie jest plik kopii z tej aplikacji.');
   const arr = <T,>(k: string) => (Array.isArray(d[k]) ? (d[k] as T[]) : []);
-  await db.transaction('rw', [db.tasks, db.projects, db.stages, db.labels, db.filters, db.blocks, db.settings, db.goals], async () => {
+  await db.transaction('rw', [db.tasks, db.projects, db.stages, db.labels, db.filters, db.blocks, db.settings, db.goals, db.routines, db.routineChecks], async () => {
     const key = await db.settings.get('aiKey'); // the API key stays on this device
-    await Promise.all([db.tasks.clear(), db.projects.clear(), db.stages.clear(), db.labels.clear(), db.filters.clear(), db.blocks.clear(), db.settings.clear(), db.goals.clear()]);
+    await Promise.all([db.tasks.clear(), db.projects.clear(), db.stages.clear(), db.labels.clear(), db.filters.clear(), db.blocks.clear(), db.settings.clear(), db.goals.clear(), db.routines.clear(), db.routineChecks.clear()]);
+    await db.routines.bulkAdd(arr('routines'));
+    await db.routineChecks.bulkAdd(arr('routineChecks'));
     await db.tasks.bulkAdd(arr('tasks'));
     await db.projects.bulkAdd(arr<Project>('projects').map((p) => ({ ...p, parentId: p.parentId ?? null, goalId: p.goalId ?? null })));
     await db.goals.bulkAdd(arr('goals'));

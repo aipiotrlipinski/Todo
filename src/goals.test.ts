@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { goalOfProject, goalStats, weekStart } from './goals';
+import { goalOfProject, goalProgress, goalStats, sortGoalsByDue, weekStart } from './goals';
 import type { Goal, Project, Task } from './types';
 
 const P = (id: string, goalId: string | null, parentId: string | null = null): Project => ({
@@ -45,5 +45,19 @@ describe('goals', () => {
     expect(g1.next?.title).toBe('next');
     expect(none.goal).toBeNull();
     expect(none.minutesThisWeek).toBe(45);
+  });
+
+  it('measures goal progress and days left', () => {
+    const g = { ...G('g1'), due: '2026-11-13', createdAt: new Date(2026, 10, 3).getTime() - 10 * 86_400_000 };
+    const ps = [P('a', 'g1'), P('b', null, 'a'), P('c', null)];
+    const ts = [T({ projectId: 'a', status: 'done' }), T({ projectId: 'b' }), T({ projectId: 'c' }), T({ projectId: 'b', parentId: 'x' })];
+    const pr = goalProgress(g, ps, ts, '2026-11-03');
+    expect(pr).toMatchObject({ done: 1, total: 2, daysLeft: 10 });
+    expect(pr.timeGone).toBeCloseTo(0.5);
+  });
+
+  it('sorts goals by due date, undated last', () => {
+    const gs = [{ ...G('a'), due: null }, { ...G('b'), due: '2027-01-01' }, { ...G('c'), due: '2026-12-01' }];
+    expect(sortGoalsByDue(gs).map((g) => g.id)).toEqual(['c', 'b', 'a']);
   });
 });

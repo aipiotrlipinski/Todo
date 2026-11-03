@@ -6,7 +6,8 @@ import { TaskEditor } from './components/TaskEditor';
 import { toISO, useData, useNow, UIProvider } from './store';
 import { useTheme } from './theme';
 import type { View } from './types';
-import { Goals } from './views/Goals';
+import { Goals, GoalView } from './views/Goals';
+import { Routines } from './views/Routines';
 import { Home } from './views/Home';
 import { Inbox } from './views/Inbox';
 import { Now } from './views/Now';
@@ -86,7 +87,7 @@ export function App() {
         return;
       }
       if (Date.now() - gPressed.current < 1200) {
-        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' }, c: { kind: 'goals' }, n: { kind: 'now' }, w: { kind: 'week' }, p: { kind: 'home' } };
+        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' }, c: { kind: 'goals' }, n: { kind: 'now' }, w: { kind: 'week' }, p: { kind: 'home' }, h: { kind: 'routines' } };
         if (map[k]) {
           e.preventDefault();
           setView(map[k]);
@@ -113,6 +114,8 @@ export function App() {
           {view.kind === 'label' && <LabelView id={view.id} />}
           {view.kind === 'settings' && <Settings theme={theme} />}
           {view.kind === 'goals' && <Goals />}
+          {view.kind === 'goal' && <GoalView id={view.id} />}
+          {view.kind === 'routines' && <Routines />}
           {view.kind === 'now' && <Now />}
           {view.kind === 'week' && <Week />}
           {view.kind === 'home' && <Home />}

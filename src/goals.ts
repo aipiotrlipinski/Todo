@@ -68,3 +68,37 @@ export function goalStats(goals: Goal[], projects: Project[], tasks: Task[], now
 
   return [...goals.filter((g) => g.status === 'active').map(make), make(null)];
 }
+
+export interface GoalProgress {
+  done: number;
+  total: number;
+  /** share of time from creation to the due date already gone (0–1), null without a date */
+  timeGone: number | null;
+  /** days left to the due date (negative = after the date), null without a date */
+  daysLeft: number | null;
+}
+
+/** Progress of a goal: top-level tasks in all its projects, and how much time is left. */
+export function goalProgress(goal: Goal, projects: Project[], tasks: Task[], today: string): GoalProgress {
+  const ids = new Set(projectsOfGoal(goal.id, projects).map((p) => p.id));
+  const mine = tasks.filter((t) => t.projectId && ids.has(t.projectId) && !t.parentId);
+  const day = (iso: string) => {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).getTime();
+  };
+  let timeGone: number | null = null;
+  let daysLeft: number | null = null;
+  if (goal.due) {
+    const start = new Date(goal.createdAt);
+    start.setHours(0, 0, 0, 0);
+    const span = day(goal.due) - start.getTime();
+    timeGone = span > 0 ? Math.min(1, Math.max(0, (day(today) - start.getTime()) / span)) : 1;
+    daysLeft = Math.round((day(goal.due) - day(today)) / 86_400_000);
+  }
+  return { done: mine.filter((t) => t.status === 'done').length, total: mine.length, timeGone, daysLeft };
+}
+
+/** Active goals: nearest due date first, goals without a date at the end (in their own order). */
+export function sortGoalsByDue(goals: Goal[]): Goal[] {
+  return [...goals].sort((a, b) => (a.due ?? '9999').localeCompare(b.due ?? '9999') || a.order - b.order);
+}

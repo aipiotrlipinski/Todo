@@ -41,10 +41,11 @@ przenoszenie przez Ustawienia → kopia JSON.
 - Styl: zwykły CSS ze zmiennymi (`src/styles.css`), bez Tailwinda.
 
 ## Struktura
-- `src/types.ts` – model: Task, Project (goalId), Goal, Stage, Label, SavedFilter, Block, Setting, View (+ review, goals, now)
-- `src/db.ts` – schemat Dexie (baza `plan`, wersja 3: tabela goals, projects.goalId). Zmiana schematu = kolejna `this.version(n)` z `upgrade`.
+- `src/types.ts` – model: Task, Project (goalId), Goal (due), Routine, RoutineCheck, Stage, Label, SavedFilter, Block, Setting, View (+ review, goals, goal, routines, now)
+- `src/db.ts` – schemat Dexie (baza `plan`, wersja 4: tabele routines i routineChecks; v3: goals, projects.goalId). Zmiana schematu = kolejna `this.version(n)` z `upgrade`.
 - `src/planner.ts` – planowanie pod realny czas: stałe punkty dnia (ustawienie `fixed`), wolne okna, pojemność, propozycja co przenieść, „Ułóż mój dzień”, czas do następnego punktu (testy w `planner.test.ts`)
-- `src/goals.ts` – cele: cel projektu (podprojekt dziedziczy), czas na cel w tym/poprzednim tygodniu z szacunków zrobionych zadań (testy)
+- `src/goals.ts` – cele: cel projektu (podprojekt dziedziczy), czas na cel w tym/poprzednim tygodniu z szacunków zrobionych zadań, `goalProgress` (zadania zrobione / wszystkie, ile czasu minęło do terminu, dni do terminu), `sortGoalsByDue` (testy)
+- `src/routines.ts` – rutyny: czy dotyczy dnia (dni tygodnia, puste = codziennie), seria (dziś nieodhaczone jej nie przerywa), skuteczność z 30 dni, `routinesLeftToday` (testy w `routines.test.ts`). Odhaczenie = wiersz `routineChecks` o id `routineId|data`; store ładuje ostatnie 400 dni.
 - `src/ai.ts` – asystent (Claude API, klucz `aiKey` tylko lokalnie, nie trafia do kopii JSON; na telefonie przez CapacitorHttp): opis/dyktowanie → zadania (narzędzie add_tasks), rozpisanie projektu (plan_project); odpowiedź zawsze czyszczona `cleanTask` (testy w `ai.test.ts`). Modele: claude-sonnet-5-5 (domyślny), claude-haiku-5-5.
 - `src/parser.ts` – szybkie dodawanie po polsku (testy w `parser.test.ts`)
 - `src/recurrence.ts` – powtarzanie (pierwsze/następne wystąpienie, opis)
@@ -53,13 +54,14 @@ przenoszenie przez Ustawienia → kopia JSON.
 - `src/selectors.ts` – filtrowanie i sortowanie list; `nowCandidates` dla widoku Teraz (testy w `selectors.test.ts`)
 - `src/store.tsx` – DataProvider (useLiveQuery), UI context (openTask, openAssistant), ustawienia (okna planu dnia, stałe punkty, domyślny szacunek, godzina/dzień przeglądu, klucz i model AI)
 - `src/theme.ts` – motyw
-- `src/App.tsx` – układ, widoki, skróty (Q, A = asystent, G+T/I/U/S/N/C/R/W/P), toast z „Cofnij”
+- `src/App.tsx` – układ, widoki, skróty (Q, A = asystent, G+T/I/U/S/N/C/R/W/P/H; H = Rutyny), toast z „Cofnij”
 - `src/components/sortable.tsx` – przeciąganie (dnd-kit): uchwyt, czujniki, komunikaty po polsku
-- `src/components/BottomNav.tsx` – dolny pasek na telefonie (≤860px): Skrzynka, Dziś, Nadchodzące, Projekty; „Projekty” = widok `browse` (menu na pełny ekran: projekty, etykiety, ustawienia, motyw). Na PC pasek ukryty, menu boczne bez zmian.
+- `src/components/BottomNav.tsx` – dolny pasek na telefonie (≤860px): Skrzynka, Dziś, Nadchodzące, Rutyny (licznik pozostałych na dziś), Cele, Projekty; „Projekty” = widok `browse` (menu na pełny ekran: projekty, etykiety, ustawienia, motyw). Na PC pasek ukryty, menu boczne bez zmian.
 - `src/components/` – Sidebar (projekty i podprojekty z przeciąganiem), QuickAdd (podświetlanie przez warstwę „mirror”), TaskItem/TaskList/TaskTree, TaskEditor (okno), DayPlan (oś dnia: upuszczanie zadań z listy, przesuwanie bloków, zmiana długości dolną krawędzią; podgląd miejsca upuszczenia), icons
 - `src/components/Assistant.tsx` – okno asystenta: dyktowanie (Web Speech API, pl-PL, gdy dostępne), podgląd propozycji z odznaczaniem i poprawą tytułów, dodanie z „Cofnij”
 - `src/views/Review.tsx` – przegląd dnia (co się udało → niedokończone po jednym → 3 najważniejsze na jutro) i tygodnia (+ skrzynka, projekty bez kroku/bez ruchu, cele, obciążenie 7 dni); baner na Dziś od `reviewTime` / w `weeklyReviewDay`
-- `src/views/Goals.tsx` – Cele: podział czasu w tygodniu, karta celu (dlaczego, statystyki, następny krok, przypięte projekty); `GoalsWeek` w przeglądzie
+- `src/views/Goals.tsx` – Cele: lista celów od najbliższego terminu (termin, ile dni zostało, pasek postępu zadań z kreską „ile czasu minęło”, „za czasem”), dodawanie z datą; kliknięcie → `GoalView`: wszystkie projekty celu (i podprojekty) z otwartymi zadaniami i szybkim dodawaniem, „Nowy projekt w tym celu”, „Edytuj cel” = dawna karta celu (termin, dlaczego, statystyki, przypinanie projektów); `GoalsWeek` w przeglądzie
+- `src/views/Routines.tsx` – Rutyny: lista na dzień z odhaczaniem, ‹ › poprzednie dni (można odhaczyć wczoraj), grupy wg pory dnia, seria, ostatnie 7 dni, edycja po kliknięciu (nazwa, dni tygodnia, pora, usuń z „Cofnij”), „Nie w ten dzień”
 - `src/components/timeDrag.tsx` – przeciąganie na oś dnia i między dniami: czujniki (mysz 4 px, dotyk przytrzymanie ~0,2 s), `minuteAt` (minuta z pozycji, co 15 min), `DraggableRow`
 - `src/week.ts` – tydzień od poniedziałku, kolumna dnia (dziś zbiera zaległe), obciążenie dnia (empty/ok/busy/over), `nextPoint` (trwający/następny punkt dnia) (testy w `week.test.ts`)
 - `src/views/Week.tsx` – Tablica tygodnia (G+W): kolumna „Bez terminu” (skrzynka) + 7 dni z paskiem obciążenia, przeciąganie zadań między dniami, ‹ › tygodnie; na telefonie jedna kolumna na ekran, start od dziś
@@ -70,6 +72,7 @@ przenoszenie przez Ustawienia → kopia JSON.
 - `src/native.ts` + `android/.../PlanBarsPlugin.java` – w APK: wysokość paska stanu/nawigacji (`--safe-top`, `--safe-bottom` w CSS) i kolor ikon paska zgodny z motywem
 
 ## Stan (2026-11-03, wersja 4: nowe widoki)
+Zrobione 2026-11-03 (później): Rutyny (nowy widok, dolny pasek + menu, kopia JSON obejmuje rutyny) i przebudowane Cele (lista po terminie, ekran celu z zadaniami projektów).
 Zrobione 2026-11-03 (z 5 makiet wybrane 1, 2 i 5, makiety: https://claude.ai/artifact/8AWwmqPYQAwQycRSbSza2F):
 (1) oś dnia z przeciąganiem — zadanie z listy na oś = godzina, blok przesuwany, dolna krawędź = szacunek, blok upuszczony na listę traci godzinę, „Cofnij” w toaście;
 (2) tablica — widok Tydzień (7 dni + bez terminu, obciążenie, przeciąganie) i tablica etapów w projekcie (Lista/Tablica);
@@ -98,3 +101,5 @@ przy otwartym oknie zadania kliknięcie podzadania otwiera je bez zapisu zmian r
 - [x] Asystent AI po polsku
 - [x] Filtr „Teraz” (mam X minut)
 - [x] Oś dnia z przeciąganiem, tablica tygodnia i etapów, Pulpit (makiety 1, 2, 5)
+- [x] Rutyny — codzienne rzeczy do odhaczenia (dolny pasek)
+- [x] Cele z terminem w dolnym pasku; kliknięcie celu → wszystkie projekty i zadania celu

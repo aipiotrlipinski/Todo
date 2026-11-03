@@ -81,3 +81,6 @@ export const IconHome = () => (
 export const IconBoard = () => (
   <svg {...base}><rect x="2.5" y="3.5" width="4" height="13" rx="1.2" /><rect x="8" y="3.5" width="4" height="9" rx="1.2" /><rect x="13.5" y="3.5" width="4" height="11" rx="1.2" /></svg>
 );
+export const IconRoutine = () => (
+  <svg {...base}><path d="M15.5 7.5A6 6 0 1 0 16 11" /><path d="M16.5 4v3.8h-3.8" /><path d="M7.5 10.2l1.8 1.8 3.4-3.6" /></svg>
+);

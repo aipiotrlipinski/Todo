@@ -60,6 +60,28 @@ export interface Goal {
   updatedAt: number;
 }
 
+/** A daily habit to tick off ("Rutyny"), separate from tasks. */
+export interface Routine {
+  id: string;
+  name: string;
+  /** days of week it applies to, 0 = Monday … 6 = Sunday; empty = every day */
+  weekdays: number[];
+  /** optional part of the day, used only for grouping */
+  part: 'morning' | 'day' | 'evening' | null;
+  status: 'active' | 'archived';
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** One tick of a routine on a day. id = `${routineId}|${date}` */
+export interface RoutineCheck {
+  id: string;
+  routineId: string;
+  date: string;
+  at: number;
+}
+
 export interface Stage {
   id: string;
   projectId: string;
@@ -114,6 +136,9 @@ export type View =
   | { kind: 'settings' }
   | { kind: 'review'; mode: 'day' | 'week' }
   | { kind: 'goals' }
+  /** one goal with all tasks of its projects */
+  | { kind: 'goal'; id: string }
+  | { kind: 'routines' }
   | { kind: 'now' }
   | { kind: 'week' }
   /** Dashboard (Pulpit) */

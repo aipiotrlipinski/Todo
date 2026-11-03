@@ -3,7 +3,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { db } from './db';
 import { toISO, weekdayIndex } from './dates';
 import type { FixedBlock } from './planner';
-import type { Goal, Label, Project, Stage, Task, View } from './types';
+import { addDays } from './dates';
+import type { Goal, Label, Project, Routine, RoutineCheck, Stage, Task, View } from './types';
 
 export interface PlanWindow {
   start: string;
@@ -49,6 +50,11 @@ export interface Data {
   stages: Stage[];
   labels: Label[];
   goals: Goal[];
+  routines: Routine[];
+  /** ticks of the last ~400 days */
+  routineChecks: RoutineCheck[];
+  /** ids of routineChecks for quick lookup */
+  routineDone: Set<string>;
   settings: AppSettings;
   projectById: Map<string, Project>;
   stageById: Map<string, Stage>;
@@ -88,9 +94,11 @@ export function DataProvider({ children, loading }: { children: ReactNode; loadi
   const labels = useLiveQuery(() => db.labels.toArray(), []);
   const settingRows = useLiveQuery(() => db.settings.toArray(), []);
   const goals = useLiveQuery(() => db.goals.orderBy('order').toArray(), []);
+  const routines = useLiveQuery(() => db.routines.orderBy('order').toArray(), []);
+  const routineChecks = useLiveQuery(() => db.routineChecks.where('date').aboveOrEqual(addDays(toISO(new Date()), -400)).toArray(), []);
 
   const value = useMemo<Data | null>(() => {
-    if (!tasks || !projects || !stages || !labels || !settingRows || !goals) return null;
+    if (!tasks || !projects || !stages || !labels || !settingRows || !goals || !routines || !routineChecks) return null;
     const s = { ...DEFAULT_SETTINGS };
     for (const r of settingRows) (s as Record<string, unknown>)[r.key] = r.value;
     return {
@@ -99,12 +107,15 @@ export function DataProvider({ children, loading }: { children: ReactNode; loadi
       stages,
       labels: [...labels].sort((a, b) => a.name.localeCompare(b.name, 'pl')),
       goals,
+      routines,
+      routineChecks,
+      routineDone: new Set(routineChecks.map((c) => c.id)),
       settings: s,
       projectById: new Map(projects.map((p) => [p.id, p])),
       stageById: new Map(stages.map((x) => [x.id, x])),
       labelById: new Map(labels.map((l) => [l.id, l])),
     };
-  }, [tasks, projects, stages, labels, settingRows, goals]);
+  }, [tasks, projects, stages, labels, settingRows, goals, routines, routineChecks]);
 
   if (!value) return <>{loading}</>;
   return <DataCtx.Provider value={value}>{children}</DataCtx.Provider>;
