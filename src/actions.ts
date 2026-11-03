@@ -1,7 +1,7 @@
 import { db, newId } from './db';
 import type { NamedRef, Parsed } from './parser';
 import { nextDueAfterDone } from './recurrence';
-import type { Label, Project, Stage, Task } from './types';
+import type { Goal, Label, Project, Stage, Task } from './types';
 
 export const PROJECT_COLORS = ['#6D4AFF', '#1F9D6B', '#E07B12', '#2F7BE5', '#D6457A', '#8A6B2E', '#4B9DB0', '#7B8494'];
 
@@ -16,6 +16,7 @@ export async function createProject(name: string, parentId: string | null = null
     parentId: parent ? parent.parentId ?? parent.id : null, // only one level of nesting
     color: parent?.color ?? PROJECT_COLORS[count % PROJECT_COLORS.length],
     goal: '',
+    goalId: parent?.goalId ?? null,
     due: null,
     status: 'active',
     order: now(),
@@ -216,6 +217,45 @@ export async function deleteLabel(id: string) {
   });
 }
 
+// ---- Goals --------------------------------------------------------------
+
+export async function createGoal(name: string): Promise<Goal> {
+  const count = await db.goals.count();
+  const g: Goal = {
+    id: newId(),
+    name: name.trim(),
+    why: '',
+    color: PROJECT_COLORS[(count + 3) % PROJECT_COLORS.length],
+    due: null,
+    status: 'active',
+    order: now(),
+    createdAt: now(),
+    updatedAt: now(),
+  };
+  await db.goals.add(g);
+  return g;
+}
+
+export async function updateGoal(id: string, changes: Partial<Goal>) {
+  await db.goals.update(id, { ...changes, updatedAt: now() });
+}
+
+/** Deletes a goal; its projects stay, just without a goal. */
+export async function deleteGoal(id: string) {
+  await db.transaction('rw', [db.goals, db.projects], async () => {
+    const ps = await db.projects.where('goalId').equals(id).toArray();
+    for (const p of ps) await db.projects.update(p.id, { goalId: null, updatedAt: now() });
+    await db.goals.delete(id);
+  });
+}
+
+/** Sets many task changes at once (auto-planning, review). */
+export async function updateTasks(changes: { id: string; changes: Partial<Task> }[]) {
+  await db.transaction('rw', db.tasks, async () => {
+    for (const c of changes) await db.tasks.update(c.id, { ...c.changes, updatedAt: now() });
+  });
+}
+
 export async function setSetting(key: string, value: unknown) {
   await db.settings.put({ key, value });
 }
@@ -223,7 +263,7 @@ export async function setSetting(key: string, value: unknown) {
 // ---- Backup -------------------------------------------------------------
 
 export async function exportAll() {
-  const [tasks, projects, stages, labels, filters, blocks, settings] = await Promise.all([
+  const [tasks, projects, stages, labels, filters, blocks, settings, goals] = await Promise.all([
     db.tasks.toArray(),
     db.projects.toArray(),
     db.stages.toArray(),
@@ -231,18 +271,20 @@ export async function exportAll() {
     db.filters.toArray(),
     db.blocks.toArray(),
     db.settings.toArray(),
+    db.goals.toArray(),
   ]);
-  return { app: 'plan', version: 1, exportedAt: new Date().toISOString(), tasks, projects, stages, labels, filters, blocks, settings };
+  return { app: 'plan', version: 1, exportedAt: new Date().toISOString(), tasks, projects, stages, labels, filters, blocks, settings, goals };
 }
 
 export async function importAll(data: unknown) {
   const d = data as Record<string, unknown>;
   if (!d || d.app !== 'plan' || !Array.isArray(d.tasks)) throw new Error('To nie jest plik kopii z tej aplikacji.');
   const arr = <T,>(k: string) => (Array.isArray(d[k]) ? (d[k] as T[]) : []);
-  await db.transaction('rw', [db.tasks, db.projects, db.stages, db.labels, db.filters, db.blocks, db.settings], async () => {
-    await Promise.all([db.tasks.clear(), db.projects.clear(), db.stages.clear(), db.labels.clear(), db.filters.clear(), db.blocks.clear(), db.settings.clear()]);
+  await db.transaction('rw', [db.tasks, db.projects, db.stages, db.labels, db.filters, db.blocks, db.settings, db.goals], async () => {
+    await Promise.all([db.tasks.clear(), db.projects.clear(), db.stages.clear(), db.labels.clear(), db.filters.clear(), db.blocks.clear(), db.settings.clear(), db.goals.clear()]);
     await db.tasks.bulkAdd(arr('tasks'));
-    await db.projects.bulkAdd(arr<Project>('projects').map((p) => ({ ...p, parentId: p.parentId ?? null })));
+    await db.projects.bulkAdd(arr<Project>('projects').map((p) => ({ ...p, parentId: p.parentId ?? null, goalId: p.goalId ?? null })));
+    await db.goals.bulkAdd(arr('goals'));
     await db.stages.bulkAdd(arr('stages'));
     await db.labels.bulkAdd(arr('labels'));
     await db.filters.bulkAdd(arr('filters'));

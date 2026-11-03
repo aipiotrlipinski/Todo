@@ -364,6 +364,7 @@ export async function importTodoist(data: TdData, today: string): Promise<Import
         parentId: parentOurs,
         color: (p.color && TD_COLORS[p.color]) || PROJECT_COLORS[colorIdx++ % PROJECT_COLORS.length],
         goal: '',
+        goalId: null,
         due: null,
         status: 'active',
         order: stamp + i,

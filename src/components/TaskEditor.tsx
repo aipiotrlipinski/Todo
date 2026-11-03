@@ -139,6 +139,13 @@ export function TaskEditor({ task }: { task: Task }) {
             <input type="number" min={0} step={5} value={draft.estimate ?? ''} onChange={(e) => set('estimate', e.target.value ? Number(e.target.value) : null)} />
           </label>
         </div>
+        <div className="est-chips" role="group" aria-label="Szybki wybór czasu">
+          {[5, 15, 30, 45, 60, 90, 120].map((m) => (
+            <button key={m} type="button" className={`chip chip-btn${draft.estimate === m ? ' active' : ''}`} aria-pressed={draft.estimate === m} onClick={() => set('estimate', m)}>
+              {m < 60 ? `${m} min` : `${m / 60} h`.replace('1.5 h', '1,5 h')}
+            </button>
+          ))}
+        </div>
 
         <div className="field-row">
           <label className="field">

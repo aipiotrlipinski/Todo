@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Block, Label, Project, SavedFilter, Setting, Stage, Task } from './types';
+import type { Block, Goal, Label, Project, SavedFilter, Setting, Stage, Task } from './types';
 
 // Local database in the browser (IndexedDB). Nothing leaves this computer.
 export class PlanDB extends Dexie {
@@ -10,6 +10,7 @@ export class PlanDB extends Dexie {
   filters!: EntityTable<SavedFilter, 'id'>;
   blocks!: EntityTable<Block, 'id'>;
   settings!: EntityTable<Setting, 'key'>;
+  goals!: EntityTable<Goal, 'id'>;
 
   constructor() {
     super('plan');
@@ -31,6 +32,17 @@ export class PlanDB extends Dexie {
           .toCollection()
           .modify((p: { parentId?: string | null }) => {
             if (p.parentId === undefined) p.parentId = null;
+          }),
+      );
+    // v3: goals above projects
+    this.version(3)
+      .stores({ goals: 'id, order', projects: 'id, order, parentId, goalId' })
+      .upgrade((tx) =>
+        tx
+          .table('projects')
+          .toCollection()
+          .modify((p: { goalId?: string | null }) => {
+            if (p.goalId === undefined) p.goalId = null;
           }),
       );
   }

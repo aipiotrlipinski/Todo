@@ -37,8 +37,24 @@ export interface Project {
   parentId: string | null;
   color: string;
   goal: string;
+  /** Life goal this project serves (Goal.id) */
+  goalId: string | null;
   due: string | null;
   status: 'active' | 'paused' | 'done';
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** A big goal above projects, e.g. "Awans", "Nauka AI". */
+export interface Goal {
+  id: string;
+  name: string;
+  /** why it matters, in the user's words */
+  why: string;
+  color: string;
+  due: string | null;
+  status: 'active' | 'done';
   order: number;
   createdAt: number;
   updatedAt: number;
@@ -96,5 +112,8 @@ export type View =
   | { kind: 'project'; id: string }
   | { kind: 'label'; id: string }
   | { kind: 'settings' }
+  | { kind: 'review'; mode: 'day' | 'week' }
+  | { kind: 'goals' }
+  | { kind: 'now' }
   /** Phone only: the menu (projects, labels, settings) as a full screen. */
   | { kind: 'browse' };

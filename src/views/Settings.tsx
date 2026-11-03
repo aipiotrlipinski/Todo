@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { exportAll, importAll, setSetting } from '../actions';
-import { daysBetween, formatLong } from '../dates';
+import { daysBetween, formatLong, WEEKDAYS, WEEKDAYS_SHORT } from '../dates';
+import { newId } from '../db';
+import type { FixedBlock } from '../planner';
 import { useData, useUI, type PlanWindow } from '../store';
 import type { ThemePref } from '../theme';
 import { Header } from './Header';
@@ -78,6 +80,29 @@ export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: Them
           ))}
         </div>
 
+        <FixedBlocks list={settings.fixed} />
+
+        <div className="settings-group">
+          <h2 className="panel-title">Szacowanie i przegląd</h2>
+          <div className="field-row">
+            <label className="field">
+              <span>Zadanie bez szacunku liczę jako (min)</span>
+              <input type="number" min={5} step={5} value={settings.defaultEstimate}
+                onChange={(e) => Number(e.target.value) > 0 && setSetting('defaultEstimate', Number(e.target.value))} />
+            </label>
+            <label className="field">
+              <span>Przypomnienie o przeglądzie dnia od</span>
+              <input type="time" value={settings.reviewTime} onChange={(e) => e.target.value && setSetting('reviewTime', e.target.value)} />
+            </label>
+            <label className="field">
+              <span>Przegląd tygodnia w</span>
+              <select value={settings.weeklyReviewDay} onChange={(e) => setSetting('weeklyReviewDay', Number(e.target.value))}>
+                {WEEKDAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+              </select>
+            </label>
+          </div>
+        </div>
+
         <div className="settings-group">
           <h2 className="panel-title">Motyw</h2>
           <div className="segmented wide" role="group" aria-label="Motyw">
@@ -124,5 +149,41 @@ export function Settings({ theme }: { theme: { pref: ThemePref; choose: (p: Them
         </div>
       </section>
     </>
+  );
+}
+
+/** Recurring fixed points of the day: they are cut out of the free time. */
+function FixedBlocks({ list }: { list: FixedBlock[] }) {
+  const save = (next: FixedBlock[]) => setSetting('fixed', next);
+  const change = (id: string, ch: Partial<FixedBlock>) => save(list.map((f) => (f.id === id ? { ...f, ...ch } : f)));
+  const toggleDay = (f: FixedBlock, i: number) => {
+    const days = f.days.includes(i) ? f.days.filter((d) => d !== i) : [...f.days, i].sort();
+    if (days.length) change(f.id, { days });
+  };
+  const add = () => save([...list, { id: newId(), title: '', days: [0, 1, 2, 3, 4], start: '17:00', end: '18:00' }]);
+
+  return (
+    <div className="settings-group">
+      <h2 className="panel-title">Stałe punkty dnia</h2>
+      <p className="muted small">
+        Siłownia, odbiór dziecka, kolacja — wszystko, co zawsze zajmuje czas. Plan dnia odejmuje je od wolnego czasu i nie układa na nich zadań.
+      </p>
+      {list.map((f) => (
+        <div key={f.id} className="fixed-row">
+          <input className="inline-input" value={f.title} placeholder="Nazwa, np. Siłownia" aria-label="Nazwa stałego punktu"
+            onChange={(e) => change(f.id, { title: e.target.value })} />
+          <div className="weekday-picker" role="group" aria-label="Dni tygodnia">
+            {WEEKDAYS_SHORT.map((d, i) => (
+              <button key={d} type="button" className={f.days.includes(i) ? 'on' : ''} aria-pressed={f.days.includes(i)} aria-label={WEEKDAYS[i]} onClick={() => toggleDay(f, i)}>{d}</button>
+            ))}
+          </div>
+          <input type="time" value={f.start} aria-label="Od" onChange={(e) => e.target.value && change(f.id, { start: e.target.value })} />
+          <span className="muted">–</span>
+          <input type="time" value={f.end} aria-label="Do" onChange={(e) => e.target.value && change(f.id, { end: e.target.value })} />
+          <button type="button" className="icon-btn small" aria-label={`Usuń ${f.title || 'stały punkt'}`} onClick={() => save(list.filter((x) => x.id !== f.id))}>×</button>
+        </div>
+      ))}
+      <button type="button" className="secondary-btn" onClick={add}>+ Dodaj stały punkt</button>
+    </div>
   );
 }
