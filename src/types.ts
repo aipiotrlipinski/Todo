@@ -74,12 +74,14 @@ export interface Routine {
   updatedAt: number;
 }
 
-/** One tick of a routine on a day. id = `${routineId}|${date}` */
+/** One mark of a routine on a day. id = `${routineId}|${date}` */
 export interface RoutineCheck {
   id: string;
   routineId: string;
   date: string;
   at: number;
+  /** true = marked as not done (✗); missing/false = done (✓) */
+  missed?: boolean;
 }
 
 export interface Stage {

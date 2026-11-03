@@ -11,16 +11,16 @@ export function appliesOn(r: Routine, date: string): boolean {
 
 /**
  * Streak: consecutive applicable days ticked, counting back from today.
- * Today not ticked yet does not break the streak (the day is not over).
+ * Today not ticked yet does not break the streak (the day is not over), unless marked ✗.
  * Days the routine does not apply are skipped. Looks back at most `limit` days.
  */
-export function streak(r: Routine, done: Set<string>, today: string, limit = 400): number {
+export function streak(r: Routine, done: Set<string>, today: string, limit = 400, missed?: Set<string>): number {
   let n = 0;
   for (let i = 0; i < limit; i++) {
     const d = addDays(today, -i);
     if (!appliesOn(r, d)) continue;
     if (done.has(checkId(r.id, d))) n++;
-    else if (i > 0) break;
+    else if (i > 0 || missed?.has(checkId(r.id, d))) break;
   }
   return n;
 }
@@ -57,7 +57,7 @@ export function describeDays(w: number[]): string {
   return s.map((i) => short[i]).join(', ');
 }
 
-/** Active routines for today not ticked yet. */
-export function routinesLeftToday(routines: Routine[], done: Set<string>, today: string): number {
-  return routines.filter((r) => r.status === 'active' && appliesOn(r, today) && !done.has(checkId(r.id, today))).length;
+/** Active routines for today not marked yet (neither ✓ nor ✗). */
+export function routinesLeftToday(routines: Routine[], done: Set<string>, today: string, missed?: Set<string>): number {
+  return routines.filter((r) => r.status === 'active' && appliesOn(r, today) && !done.has(checkId(r.id, today)) && !missed?.has(checkId(r.id, today))).length;
 }

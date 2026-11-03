@@ -20,7 +20,7 @@ const sameExact = (a: View, b: View) =>
   a.kind === b.kind && ('id' in a ? a.id === (b as { id?: string }).id : true) && ('mode' in a ? a.mode === (b as { mode?: string }).mode : true);
 
 export function Sidebar({ theme }: Props) {
-  const { tasks, projects, labels, settings, projectById, routines, routineDone } = useData();
+  const { tasks, projects, labels, settings, projectById, routines, routineDone, routineMissed } = useData();
   const { view, setView, today } = useUI();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
@@ -28,7 +28,7 @@ export function Sidebar({ theme }: Props) {
 
   const t = todayTasks(tasks, today);
   const counts = { inbox: inboxTasks(tasks).length, today: t.today.length + t.overdue.length };
-  const routinesLeft = routinesLeftToday(routines, routineDone, today);
+  const routinesLeft = routinesLeftToday(routines, routineDone, today, routineMissed);
   const backupOld = !settings.lastExport || daysBetween(settings.lastExport.slice(0, 10), today) >= 7;
   const hasData = tasks.length > 0;
   const active = projects.filter((p) => p.status !== 'done');

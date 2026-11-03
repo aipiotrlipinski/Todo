@@ -53,8 +53,10 @@ export interface Data {
   routines: Routine[];
   /** ticks of the last ~400 days */
   routineChecks: RoutineCheck[];
-  /** ids of routineChecks for quick lookup */
+  /** ids of routineChecks marked done (✓) */
   routineDone: Set<string>;
+  /** ids of routineChecks marked missed (✗) */
+  routineMissed: Set<string>;
   settings: AppSettings;
   projectById: Map<string, Project>;
   stageById: Map<string, Stage>;
@@ -109,7 +111,8 @@ export function DataProvider({ children, loading }: { children: ReactNode; loadi
       goals,
       routines,
       routineChecks,
-      routineDone: new Set(routineChecks.map((c) => c.id)),
+      routineDone: new Set(routineChecks.filter((c) => !c.missed).map((c) => c.id)),
+      routineMissed: new Set(routineChecks.filter((c) => c.missed).map((c) => c.id)),
       settings: s,
       projectById: new Map(projects.map((p) => [p.id, p])),
       stageById: new Map(stages.map((x) => [x.id, x])),

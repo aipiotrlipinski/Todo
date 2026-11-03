@@ -6,10 +6,10 @@ import { IconGoal, IconInbox, IconProjects, IconRoutine, IconToday, IconUpcoming
 
 // Phone-only tab bar (like Todoist): Rutyny, Dziś, Nadchodzące, Skrzynka, Cele, Projekty.
 export function BottomNav() {
-  const { tasks, routines, routineDone } = useData();
+  const { tasks, routines, routineDone, routineMissed } = useData();
   const { view, setView, today } = useUI();
   const t = todayTasks(tasks, today);
-  const counts = { inbox: inboxTasks(tasks).length, today: t.today.length + t.overdue.length, routines: routinesLeftToday(routines, routineDone, today) };
+  const counts = { inbox: inboxTasks(tasks).length, today: t.today.length + t.overdue.length, routines: routinesLeftToday(routines, routineDone, today, routineMissed) };
   const inMenu = ['browse', 'project', 'label', 'settings', 'review', 'now', 'week', 'home'].includes(view.kind);
 
   const tab = (v: View, label: string, icon: JSX.Element, on: boolean, count?: number) => (

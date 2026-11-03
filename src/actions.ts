@@ -289,15 +289,13 @@ export async function reorderRoutines(ids: string[]) {
   });
 }
 
-/** Ticks or unticks a routine on a day. Returns the new state. */
-export async function toggleRoutine(routineId: string, date: string): Promise<boolean> {
+export type RoutineMark = 'done' | 'missed' | null;
+
+/** Marks a routine on a day: ✓ done, ✗ missed, or null = clear. */
+export async function setRoutineMark(routineId: string, date: string, mark: RoutineMark) {
   const id = checkId(routineId, date);
-  if (await db.routineChecks.get(id)) {
-    await db.routineChecks.delete(id);
-    return false;
-  }
-  await db.routineChecks.put({ id, routineId, date, at: now() });
-  return true;
+  if (!mark) await db.routineChecks.delete(id);
+  else await db.routineChecks.put({ id, routineId, date, at: now(), ...(mark === 'missed' ? { missed: true } : {}) });
 }
 
 /** Sets many task changes at once (auto-planning, review). */

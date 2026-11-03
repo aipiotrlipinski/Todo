@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { createRoutine, deleteRoutine, restoreRoutine, toggleRoutine, updateRoutine } from '../actions';
-import { IconCheck, IconTrash } from '../components/icons';
+import { createRoutine, deleteRoutine, restoreRoutine, setRoutineMark, updateRoutine, type RoutineMark } from '../actions';
+import { IconCheck, IconClose, IconTrash } from '../components/icons';
 import { addDays, formatLong, weekdayIndex, WEEKDAYS_SHORT } from '../dates';
 import { appliesOn, checkId, describeDays, PARTS, rate, streak } from '../routines';
 import { useData, useUI } from '../store';
@@ -26,7 +26,7 @@ function WeekdayPicker({ value, onChange }: { value: number[]; onChange: (w: num
 }
 
 export function Routines() {
-  const { routines, routineDone } = useData();
+  const { routines, routineDone, routineMissed } = useData();
   const { today, toast } = useUI();
   const [day, setDay] = useState(today);
   const [name, setName] = useState('');
@@ -38,6 +38,7 @@ export function Routines() {
   const forDay = active.filter((r) => appliesOn(r, day));
   const notToday = active.filter((r) => !appliesOn(r, day));
   const doneCount = forDay.filter((r) => routineDone.has(checkId(r.id, day))).length;
+  const missedCount = forDay.filter((r) => routineMissed.has(checkId(r.id, day))).length;
   const pct = forDay.length ? Math.round((doneCount / forDay.length) * 100) : 0;
   const isToday = day === today;
 
@@ -47,9 +48,12 @@ export function Routines() {
     setName('');
   };
 
-  const tick = async (r: Routine) => {
-    const on = await toggleRoutine(r.id, day);
-    if (on && doneCount + 1 === forDay.length) toast(isToday ? 'Wszystkie rutyny na dziś zrobione!' : 'Wszystkie rutyny z tego dnia zrobione');
+  const mark = async (r: Routine, m: 'done' | 'missed') => {
+    const id = checkId(r.id, day);
+    const current: RoutineMark = routineDone.has(id) ? 'done' : routineMissed.has(id) ? 'missed' : null;
+    const next: RoutineMark = current === m ? null : m;
+    await setRoutineMark(r.id, day, next);
+    if (next === 'done' && current !== 'done' && doneCount + 1 === forDay.length) toast(isToday ? 'Wszystkie rutyny na dziś zrobione!' : 'Wszystkie rutyny z tego dnia zrobione');
   };
 
   const remove = async (r: Routine) => {
@@ -65,7 +69,7 @@ export function Routines() {
       <Header
         eyebrow="Codziennie"
         title="Rutyny"
-        subtitle={forDay.length ? `${doneCount} z ${forDay.length} zrobione${isToday ? ' dziś' : ''}` : 'Stałe nawyki do odhaczenia każdego dnia.'}
+        subtitle={forDay.length ? `${doneCount} z ${forDay.length} zrobione${isToday ? ' dziś' : ''}${missedCount ? ` · ${missedCount} nie wyszło` : ''}` : 'Stałe nawyki do odhaczenia każdego dnia.'}
         actions={
           <div className="day-switch" role="group" aria-label="Dzień">
             <button type="button" className="icon-btn" aria-label="Poprzedni dzień" onClick={() => setDay(addDays(day, -1))}>‹</button>
@@ -97,7 +101,7 @@ export function Routines() {
                 editing === r.id ? (
                   <RoutineEditor key={r.id} r={r} onClose={() => setEditing(null)} onDelete={() => remove(r)} />
                 ) : (
-                  <RoutineRow key={r.id} r={r} day={day} onTick={() => tick(r)} onEdit={() => setEditing(r.id)} />
+                  <RoutineRow key={r.id} r={r} day={day} onMark={(m) => mark(r, m)} onEdit={() => setEditing(r.id)} />
                 ),
               )}
             </div>
@@ -143,20 +147,28 @@ export function Routines() {
   );
 }
 
-function RoutineRow({ r, day, onTick, onEdit }: { r: Routine; day: string; onTick: () => void; onEdit: () => void }) {
-  const { routineDone } = useData();
+function RoutineRow({ r, day, onMark, onEdit }: { r: Routine; day: string; onMark: (m: 'done' | 'missed') => void; onEdit: () => void }) {
+  const { routineDone, routineMissed } = useData();
   const { today } = useUI();
   const done = routineDone.has(checkId(r.id, day));
-  const s = streak(r, routineDone, today);
+  const missed = routineMissed.has(checkId(r.id, day));
+  const s = streak(r, routineDone, today, 400, routineMissed);
   const m = rate(r, routineDone, today, 30);
   // last 7 days ending on the shown day
   const last = Array.from({ length: 7 }, (_, i) => addDays(day, i - 6));
 
   return (
-    <div className={`task routine${done ? ' done' : ''}`}>
-      <button type="button" className="check routine-check" aria-pressed={done} aria-label={done ? `Odznacz: ${r.name}` : `Zrobione: ${r.name}`} onClick={onTick}>
-        <IconCheck />
-      </button>
+    <div className={`task routine${done ? ' done' : ''}${missed ? ' missed' : ''}`}>
+      <span className="rmarks" role="group" aria-label={`Jak poszło: ${r.name}`}>
+        <button type="button" className={`rmark yes${done ? ' on' : ''}`} aria-pressed={done}
+          aria-label={done ? `Odznacz: ${r.name}` : `Udało się: ${r.name}`} title="Udało się" onClick={() => onMark('done')}>
+          <IconCheck />
+        </button>
+        <button type="button" className={`rmark no${missed ? ' on' : ''}`} aria-pressed={missed}
+          aria-label={missed ? `Odznacz: ${r.name}` : `Nie udało się: ${r.name}`} title="Nie udało się" onClick={() => onMark('missed')}>
+          <IconClose />
+        </button>
+      </span>
       <button type="button" className="task-body" onClick={onEdit} title="Kliknij, aby edytować">
         <span className="task-title">{r.name}</span>
         <span className="task-meta">
@@ -169,8 +181,11 @@ function RoutineRow({ r, day, onTick, onEdit }: { r: Routine; day: string; onTic
         {last.map((d) => {
           const applies = appliesOn(r, d);
           const ok = routineDone.has(checkId(r.id, d));
+          const no = routineMissed.has(checkId(r.id, d));
+          const cls = ok ? ' ok' : no ? ' no' : applies ? (d < today ? ' miss' : '') : ' off';
+          const what = ok ? 'udało się' : no ? 'nie udało się' : applies ? 'bez oceny' : 'nie dotyczy';
           return (
-            <span key={d} className={`rd${ok ? ' ok' : applies ? (d < today ? ' miss' : '') : ' off'}`} title={`${WEEKDAYS_SHORT[weekdayIndex(d)]} ${d.slice(8)}.${d.slice(5, 7)}: ${ok ? 'zrobione' : applies ? 'nie' : 'nie dotyczy'}`}>
+            <span key={d} className={`rd${cls}`} title={`${WEEKDAYS_SHORT[weekdayIndex(d)]} ${d.slice(8)}.${d.slice(5, 7)}: ${what}`}>
               {WEEKDAYS_SHORT[weekdayIndex(d)].slice(0, 1).toUpperCase()}
             </span>
           );

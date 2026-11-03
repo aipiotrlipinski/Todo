@@ -15,6 +15,11 @@ describe('routines', () => {
     expect(appliesOn(R([1]), '2026-11-03')).toBe(true);
   });
 
+  it('today marked ✗ breaks the streak', () => {
+    expect(streak(R(), ticks('2026-11-01', '2026-11-02'), '2026-11-03', 400, ticks('2026-11-03'))).toBe(0);
+    expect(streak(R(), ticks('2026-11-02', '2026-11-03'), '2026-11-03', 400, ticks('2026-11-01'))).toBe(2);
+  });
+
   it('counts the streak, today unticked does not break it', () => {
     expect(streak(R(), ticks('2026-11-01', '2026-11-02'), '2026-11-03')).toBe(2);
     expect(streak(R(), ticks('2026-11-01', '2026-11-02', '2026-11-03'), '2026-11-03')).toBe(3);
