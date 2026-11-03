@@ -63,3 +63,15 @@ export const IconGrip = () => (
 export const IconLogo = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7.5l2.5 2.5L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
+export const IconReview = () => (
+  <svg {...base}><path d="M4 5h9M4 10h6M4 15h5" /><path d="M12 13.5l2 2 3.5-4" /></svg>
+);
+export const IconGoal = () => (
+  <svg {...base}><circle cx="10" cy="10" r="7" /><circle cx="10" cy="10" r="3.5" /><circle cx="10" cy="10" r="0.8" fill="currentColor" /></svg>
+);
+export const IconNow = () => (
+  <svg {...base}><path d="M11 2.5L4.5 11H10l-1 6.5L15.5 9H10l1-6.5z" /></svg>
+);
+export const IconSpark = () => (
+  <svg {...base}><path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4L4 8.5l4.4-1.6L10 2.5zM15.5 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z" /></svg>
+);

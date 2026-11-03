@@ -5,6 +5,7 @@ import { formatLong } from '../dates';
 import { todayTasks } from '../selectors';
 import { useData, useUI } from '../store';
 import { Header } from './Header';
+import { ReviewPrompt } from './Review';
 
 export function Today() {
   const { tasks } = useData();
@@ -19,7 +20,9 @@ export function Today() {
 
   return (
     <>
-      <Header eyebrow={formatLong(today)} title="Dziś" defaults={{ due: today }} />
+      <Header eyebrow={formatLong(today)} title="Dziś" defaults={{ due: today }}>
+        <ReviewPrompt />
+      </Header>
       <div className="columns">
         <section className="panel tasks-panel" aria-label="Zadania na dziś">
           <h2 className="panel-title">Na dziś · {list.length}</h2>

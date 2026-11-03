@@ -8,6 +8,7 @@ import type { View } from './types';
 import { Inbox } from './views/Inbox';
 import { LabelView } from './views/LabelView';
 import { ProjectView } from './views/ProjectView';
+import { Review } from './views/Review';
 import { Settings } from './views/Settings';
 import { Today } from './views/Today';
 import { Upcoming } from './views/Upcoming';
@@ -73,7 +74,7 @@ export function App() {
         return;
       }
       if (Date.now() - gPressed.current < 1200) {
-        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' } };
+        const map: Record<string, View> = { t: { kind: 'today' }, i: { kind: 'inbox' }, u: { kind: 'upcoming' }, s: { kind: 'settings' }, r: { kind: 'review', mode: 'day' } };
         if (map[k]) {
           e.preventDefault();
           setView(map[k]);
@@ -91,7 +92,7 @@ export function App() {
     <UIProvider value={{ view, setView, openTask: setEditing, toast, now, today: toISO(now) }}>
       <div className={`app${view.kind === 'browse' ? ' view-browse' : ''}`}>
         <Sidebar theme={theme} />
-        <main className="main" key={view.kind + ('id' in view ? view.id : '')}>
+        <main className="main" key={view.kind + ('id' in view ? view.id : '') + ('mode' in view ? view.mode : '')}>
           {/* 'browse' is the phone menu screen; on a wide screen the sidebar is always visible, so show Today. */}
           {(view.kind === 'today' || view.kind === 'browse') && <Today />}
           {view.kind === 'inbox' && <Inbox />}
@@ -99,6 +100,7 @@ export function App() {
           {view.kind === 'project' && <ProjectView id={view.id} />}
           {view.kind === 'label' && <LabelView id={view.id} />}
           {view.kind === 'settings' && <Settings theme={theme} />}
+          {view.kind === 'review' && <Review key={view.mode} mode={view.mode} />}
         </main>
         <BottomNav />
       </div>

@@ -7,14 +7,15 @@ import { inboxTasks, projectProgress, subprojectsOf, todayTasks, topProjects } f
 import { useData, useUI } from '../store';
 import type { ThemePref } from '../theme';
 import type { Project, View } from '../types';
-import { IconInbox, IconLogo, IconMoon, IconPlus, IconSettings, IconSun, IconToday, IconUpcoming } from './icons';
+import { IconInbox, IconLogo, IconMoon, IconPlus, IconReview, IconSettings, IconSun, IconToday, IconUpcoming } from './icons';
 import { dragA11y, SortableRow, useDragSensors } from './sortable';
 
 interface Props {
   theme: { resolved: 'light' | 'dark'; choose: (p: ThemePref) => void };
 }
 
-const same = (a: View, b: View) => a.kind === b.kind && ('id' in a ? a.id === (b as { id?: string }).id : true);
+const same = (a: View, b: View) =>
+  a.kind === b.kind && ('id' in a ? a.id === (b as { id?: string }).id : true) && ('mode' in a ? a.mode === (b as { mode?: string }).mode : true);
 
 export function Sidebar({ theme }: Props) {
   const { tasks, projects, labels, settings, projectById } = useData();
@@ -114,6 +115,11 @@ export function Sidebar({ theme }: Props) {
         {nav({ kind: 'inbox' }, 'Skrzynka', <IconInbox />, counts.inbox)}
         {nav({ kind: 'today' }, 'Dziś', <IconToday />, counts.today)}
         {nav({ kind: 'upcoming' }, 'Nadchodzące', <IconUpcoming />)}
+      </div>
+
+      <div className="nav-group nav-extra">
+        {nav({ kind: 'review', mode: 'day' }, 'Przegląd dnia', <IconReview />)}
+        {nav({ kind: 'review', mode: 'week' }, 'Przegląd tygodnia', <IconReview />)}
       </div>
 
       <div className="nav-group">
